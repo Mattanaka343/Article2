@@ -1,0 +1,41 @@
+---
+title: Contaminación Ambiental y Sus Efectos en la Salud de los Mexicanos
+author: 
+- Mateo Yáñez-Tanaka
+- Fernando Ramos-Valdez 
+- Fernando Pavía-González
+- Jorge Sánchez-Ponce
+format:
+   html:
+     toc: true
+     html-math-method: katex
+     embed-resources: true
+     self-contained-math: true
+     df-print: kable
+editor: source
+bibliography: ../Resources/references.bib
+---
+## Abstract
+
+## Introducción
+
+## Metodología
+
+
+## Aplicación
+
+Para comenzar la investigación se tomaron los archivos de la encuesta Encuesta Nacional de Salud y Nutrición (ENSANUT) realizada por el Instituto Nacional de Estadística y Geografía (INEGI) y se unieron con el archivo de calidad del aire de la Secretaría del Medio Ambiente y Recursos Naturales (SEMARNAT). Se entrevistaron a varios médicos y se consultaron diversos estudios para determinar qué variables podrían resultar afectadas por cambios en la calidad del aire, y se encontró que estos
+```{python}
+#importando librerías
+import pandas as pd #usamos pandas para el manejo de los datos
+import numpy as np #usamos numpy para el manejo de arrays
+from warnings import filterwarnings
+filterwarnings('ignore')
+
+samples = pd.read_csv('../Data/ensanut2022_muestras.csv', sep= ';')
+demographics = pd.read_csv('../Data/ensanut2022_socdem.csv', sep = ';')
+air_quality = pd.read_csv('../Data/calidad_aire_2025.csv')
+
+```
+
+## Conclusiones
