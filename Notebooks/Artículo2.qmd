@@ -19,12 +19,29 @@ bibliography: ../Resources/references.bib
 
 ## Introducción
 
+
 ## Metodología
 
+&nbsp;&nbsp;&nbsp;&nbsp;Esta investigación se centró en encontrar las probabilidades de ciertos eventos que podrían ayudar a comprender mejor los efectos de la calidad del aire en la salud de la población. Para ello se utilizaron las redes bayesianas gaussianas (GBNs por sus siglas en inglés). Estas estructuras son grafos dirigidos acíclicos (DAGs por sus siglas en inglés) en los cuales todos los nodos representan variables aleatorias continuas con distribución normal y los arcos, junto con su dirección, representan dependencias condicionales. Las GBNs permiten trabajar con distribuciones condicionales locales en vez de la distribución conjunta (global)  la cual es más compleja. Las GBNs también nos dan el beneficio de poder realizar queries, una forma de inferencia para encontrar probabilidades del estilo $$\mathbb{P}(Evento|Evidencia)$$ a través de aproximaciones (con algoritmos como logic sampling o muestreo de Monte Carlo) o  de manera exacta (con algoritmos como variable elimination y junction tree) 
+
+&nbsp;&nbsp;&nbsp;&nbsp;Para la creación de los modelos computacionales se usaron los lenguajes R y Python. Python se usó para la limpieza y unificación de los datos, mientras que R se usó para la inferencia estadística. Los módulos necesarios para replicar esta investigación son:
+
+Para python: 
+
+- ```pandas``` para el procesamiento de los datos
+- ```numpy``` para el manejo de arrays
+
+Para R:
+
+- ```bnlearn``` para el entrenamiento de las redes bayesianas
+- ```rgraphviz``` para graficar las dags
+- ```tidyverse``` para el manejo de datos
+
+Adicionalmente los datos usados para esta investigación provienen del Instituto Nacional de Estadística y Geografía (INEGI), con su Encuesta Nacional de Salud y Nutrición (ENSANUT), y la Secretaría del Medio Ambiente y Recursos Naturales (SEMARNAT), con sus sistemas de monitoreo de la calidad del aire.
 
 ## Aplicación
 
-Para comenzar la investigación se tomaron los archivos de la encuesta Encuesta Nacional de Salud y Nutrición (ENSANUT) realizada por el Instituto Nacional de Estadística y Geografía (INEGI) y se unieron con el archivo de calidad del aire de la Secretaría del Medio Ambiente y Recursos Naturales (SEMARNAT). Se entrevistaron a varios médicos y se consultaron diversos estudios para determinar qué variables podrían resultar afectadas por cambios en la calidad del aire, y se encontró que estos
+Para comenzar la investigación se tomaron los archivos de la ENSANUT realizada por el INEGI y se unieron con el archivo de calidad del aire de la SEMARNAT. Se entrevistaron a varios médicos y se consultaron diversos estudios para determinar qué variables podrían resultar afectadas por cambios en la calidad del aire, y se encontró que el mayor efecto de la calidad del aire en la salud de las personas se puede notar en los sistemas respiratorio y cardiovascular. [@WHO2021AQG] Aunado a esto también se denota que los efectos de estas partículas y gases nocivos fueron más notorios en las poblaciones de hombres entre las edades de 75 a 79 y más de 80, y más fuertes a través de líneas de desarrollo socioeconómico [@10.3389/fmed.2024.1472996]. Los médicos también informan que las aflicciones más comunmente ligadas a declive en la calidad del aire son cardiopatía isquémica, enfermedad pulmonar obstructiva crónica (EPOC), asma, derrames cerebrales e incluso cancer [@WHO2021AQG]. Tomando esto en cuenta se decidió conservar únicamente las variables que la literatura sugiere tienen una correlación con estas enfermedades, estas variables son: 
 ```{python}
 #importando librerías
 import pandas as pd #usamos pandas para el manejo de los datos
