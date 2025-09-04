@@ -41,7 +41,7 @@ Adicionalmente los datos usados para esta investigación provienen del Instituto
 
 ## Aplicación
 
-Para comenzar la investigación se tomaron los archivos de la ENSANUT realizada por el INEGI y se unieron con el archivo de calidad del aire de la SEMARNAT. Se entrevistaron a varios médicos y se consultaron diversos estudios para determinar qué variables podrían resultar afectadas por cambios en la calidad del aire, y se encontró que el mayor efecto de la calidad del aire en la salud de las personas se puede notar en los sistemas respiratorio y cardiovascular. [@WHO2021AQG] Aunado a esto también se denota que los efectos de estas partículas y gases nocivos fueron más notorios en las poblaciones de hombres entre las edades de 75 a 79 y más de 80, y más fuertes a través de líneas de desarrollo socioeconómico [@10.3389/fmed.2024.1472996]. Los médicos también informan que las aflicciones más comunmente ligadas a declive en la calidad del aire son cardiopatía isquémica, enfermedad pulmonar obstructiva crónica (EPOC), asma, derrames cerebrales e incluso cancer [@WHO2021AQG]. Tomando esto en cuenta se decidió conservar únicamente las variables que la literatura sugiere tienen una correlación con estas enfermedades, estas variables son: 
+Para comenzar la investigación se tomaron los archivos de la ENSANUT realizada por el INEGI y se unieron con el archivo de calidad del aire de la SEMARNAT. Se entrevistaron a varios médicos y se consultaron diversos estudios para determinar qué variables podrían resultar afectadas por cambios en la calidad del aire, y se encontró que el mayor efecto de la calidad del aire en la salud de las personas se puede notar en los sistemas respiratorio y cardiovascular. [@WHO2021AQG] Aunado a esto también se denota que los efectos de estas partículas y gases nocivos fueron más notorios en las poblaciones de hombres entre las edades de 75 a 79 y más de 80, y más fuertes a través de líneas de desarrollo socioeconómico [@10.3389/fmed.2024.1472996]. Los médicos también informan que las aflicciones más comunmente ligadas a declive en la calidad del aire son cardiopatía isquémica, enfermedad pulmonar obstructiva crónica (EPOC), asma, derrames cerebrales e incluso cancer [@WHO2021AQG]. Tomando esto en cuenta de la ase de datoos de pruebas médicas se decidió conservar únicamente las variables que la literatura sugiere tienen una correlación con estas enfermedades, que en términos de esta base de datos se trató de la proteína C reactiva, ferritina, homocisteína, transferrina, concentración de hemoglobina y albúmina que son marcadores de inflamación. Aunado a esto se decidió conservar únicamente las fuentes de área para los valores de los contaminantes en el aire debido a que estas no tienen valores nulos y casi todos los municipios tienen este tipoo de medición. Finalmente en cuanto a valores demograficos se conservaron únicamente la edad y el sexo debido a que la literatura sugiere que son factores relevantes.
 ```{python}
 #importando librerías
 import pandas as pd #usamos pandas para el manejo de los datos
@@ -49,9 +49,61 @@ import numpy as np #usamos numpy para el manejo de arrays
 from warnings import filterwarnings
 filterwarnings('ignore')
 
+#importamos los archivos
 samples = pd.read_csv('../Data/ensanut2022_muestras.csv', sep= ';')
 demographics = pd.read_csv('../Data/ensanut2022_socdem.csv', sep = ';')
 air_quality = pd.read_csv('../Data/calidad_aire_2025.csv')
+
+#unimos los archivos provenientes de ensanut
+people_data = pd.merge(samples[['hb02','valor_ALBU','valor_PCR','valor_HCST','valor_STFR_FEB23','valor_FERRITINA','FOLIO_INT']],demographics[['FOLIO_INT','entidad1','h0302','h0303','municipio1']], how = 'inner', on = 'FOLIO_INT')
+
+#nos asegguramos de que las mediciones sean mnúmeros
+people_data.replace(' ',np.nan,inplace=True)
+people_data = people_data.apply(lambda col: col.str.replace(',', '.', regex=False).astype(float) if col.dtype == "object" else col)
+
+#nos aseguramos de que no queden valores vacíos
+people_data.dropna(inplace=True)
+
+#renombramos los estados y municipios para que tengan el mismo esquema de nombres que en los archivos de ensanut
+air_quality = air_quality[air_quality['Tipo_de_Fuente'] == 'Fuentes de área']
+ordered_states = [
+    "Aguascalientes", "Baja California", "Baja California Sur", "Campeche",
+    "Chiapas", "Chihuahua", "Ciudad de México", "Coahuila", "Colima",
+    "Durango", "Guanajuato", "Guerrero", "Hidalgo", "Jalisco", "México",
+    "Michoacán", "Morelos", "Nayarit", "Nuevo León", "Oaxaca", "Puebla",
+    "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa", "Sonora",
+    "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
+]
+
+state_to_number = {state.lower(): i+1 for i, state in enumerate(ordered_states)}
+
+municipios = demographics['desc_mun1'].unique()
+
+remap = {}
+for entry in municipios:
+    key, name = entry.split(' ', 1)
+    remap[name.lower()] = int(key)
+
+air_quality['entidad1'] = air_quality['Entidad_federativa'].str.lower().map(state_to_number)
+air_quality['municipio1'] = air_quality['Municipio'].str.lower().map(remap)
+
+#nos deshacemos de todos los municipios que no estén en la base de ensanut
+air_quality.dropna(inplace=True)
+
+#Unimos la base de datos de ensanut con la del SEMARNART
+data = pd.merge(people_data.drop(columns='FOLIO_INT'),air_quality[['municipio1','entidad1','SO_2','CO','NOx','COV','PM_010','PM_2_5','NH_3']],on = ['entidad1','municipio1'],how = 'left')
+
+#Renombramos las columnas a un esquema más funcional para la DAG
+data.columns = ['HEM','ALBU','PCR','HCST','TFR','FR','entidad1','S','E','municipio1','SO_2','CO','NOx','COV','PM_010','PM_2_5','NH_3']
+
+#Nos deshacemos de cualquier municipio que no haya tenido mediciones de área de sus contaminantes
+data.dropna(inplace=True)
+
+#Generamos un archivo csv con los datos limpios
+data.to_csv('../Data/data.csv')
+```
+
+```{python}
 
 ```
 
