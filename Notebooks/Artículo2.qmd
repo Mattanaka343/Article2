@@ -91,20 +91,33 @@ air_quality['municipio1'] = air_quality['Municipio'].str.lower().map(remap)
 air_quality.dropna(inplace=True)
 
 #Unimos la base de datos de ensanut con la del SEMARNART
-data = pd.merge(people_data.drop(columns='FOLIO_INT'),air_quality[['municipio1','entidad1','SO_2','CO','NOx','COV','PM_010','PM_2_5','NH_3']],on = ['entidad1','municipio1'],how = 'left')
+data = pd.merge(people_data.drop(columns='FOLIO_INT'),air_quality[['municipio1','entidad1','SO_2','CO','NOx','PM_010','PM_2_5']],on = ['entidad1','municipio1'],how = 'left')
 
 #Renombramos las columnas a un esquema más funcional para la DAG
-data.columns = ['HEM','ALBU','PCR','HCST','TFR','FR','entidad1','S','E','municipio1','SO_2','CO','NOx','COV','PM_010','PM_2_5','NH_3']
+data.columns = ['HEM','ALBU','PCR','HCST','TFR','FR','entidad1','S','E','municipio1','SO_2','CO','NOx','PM_010','PM_2_5']
 
 #Nos deshacemos de cualquier municipio que no haya tenido mediciones de área de sus contaminantes
 data.dropna(inplace=True)
+data.drop(columns = ['entidad1','municipio1'],inplace=True)
 
 #Generamos un archivo csv con los datos limpios
-data.to_csv('../Data/data.csv')
+data.to_csv('../Data/data.csv', index=False)
 ```
 
-```{python}
+### Construyendo Las DAGS
 
+Primero se intentó tratar este problema únicamente en términos de sus variables continuas, estas son los valores de los marcadores de inflamación en la sangre, junto con los valores de los contaminantes, después se construyó la siguiente estructura para intentar describir sus relaciones.
+```{R}
+library(bnlearn)
+library(tidyverse)
+
+data = read_csv("../Data/data.csv")
+
+dag = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][TFR][FR|NOx:TFR][PCR|NOx:SO_2:PM_010:PM_2_5][HEM|NOx:CO:PCR:PM_010][ALBU|PCR][HCST|SO_2:NOx:PM_010]')
+
+graphviz.plot(dag,shape = 'ellipse')
 ```
 
+Esta estructura fue propuesta basandose en investigación y una entrevista con la otorrinolaringólogo Rocío Yáñez 
+Zambrano. En esta se proopone que todos los contaminantes son independientes entre ellos junto con la transferrina. La transferrina junto con los niveles de óxidos de nitrógeno en el ambiente informan la cantidad de ferritina en la sangre. Las partículas con diámetro menor o igual a 10 micrómetros y 2.5 micrómetros junto con la cantidad de óxidos de nitrógeno y dióxido de azufre denotan el valor de proteína C reactiva en la sangre que informa la concentración de hemoglobina, en conjunto con el monóxido de carbono, y valores de albúmina en la sangre. Finalmente, las partículas con diámetro menor o igual a 10 micrómetros junto con las cantidades de óxidos de nitrógeno y dióxido de azufre condicionan los valores de homocisteína en la sangre.    
 ## Conclusiones
