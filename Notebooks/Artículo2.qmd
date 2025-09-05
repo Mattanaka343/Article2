@@ -118,6 +118,16 @@ dag = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][TFR][FR|NOx:TFR][PCR|NOx:SO
 graphviz.plot(dag,shape = 'ellipse')
 ```
 
-Esta estructura fue propuesta basandose en investigación y una entrevista con la otorrinolaringólogo Rocío Yáñez 
-Zambrano. En esta se proopone que todos los contaminantes son independientes entre ellos junto con la transferrina. La transferrina junto con los niveles de óxidos de nitrógeno en el ambiente informan la cantidad de ferritina en la sangre. Las partículas con diámetro menor o igual a 10 micrómetros y 2.5 micrómetros junto con la cantidad de óxidos de nitrógeno y dióxido de azufre denotan el valor de proteína C reactiva en la sangre que informa la concentración de hemoglobina, en conjunto con el monóxido de carbono, y valores de albúmina en la sangre. Finalmente, las partículas con diámetro menor o igual a 10 micrómetros junto con las cantidades de óxidos de nitrógeno y dióxido de azufre condicionan los valores de homocisteína en la sangre.    
+Esta estructura fue propuesta basandose en investigación y una entrevista con la otorrinolaringólogo Rocío Yáñez Zambrano. 
+En esta se proopone que todos los contaminantes son independientes entre ellos junto con la transferrina. La transferrina junto con los niveles de óxidos de nitrógeno en el ambiente informan la cantidad de ferritina en la sangre. Las partículas con diámetro menor o igual a 10 micrómetros y 2.5 micrómetros junto con la cantidad de óxidos de nitrógeno y dióxido de azufre denotan el valor de proteína C reactiva en la sangre que informa la concentración de hemoglobina, en conjunto con el monóxido de carbono, y valores de albúmina en la sangre. Finalmente, las partículas con diámetro menor o igual a 10 micrómetros junto con las cantidades de óxidos de nitrógeno y dióxido de azufre condicionan los valores de homocisteína en la sangre.
+
+La estructura de la segunda DAG propuesta fue basada en una investigación de la mano del cardiologo intervencionista Diego Guitierrez González, quien con su ayuda se encontraron relaciones entre los contaminates y los diferentes marcadores de inflamación. Es importante recalcar que también se considero que los contaminates son independientes, aunque no son producidos por alguno de los marcadores en la sangre, o de manera general el cuerpo, estos sí son usados o injeridos por el cuerpo, por lo cual afecta a los marcadores de la inflamación.
+Aqui el segundo DAG:
+
+```{R}
+dag = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][FR|NOx:SO_2:PM_010:PM_2_5][HEM|SO_2:CO:PM_010:PM_2_5][PCR|NOx:SO_2:PM_010][HCST|PM_010:PM_2_5][TFR|FR][ALBU|HEM:PM_2_5]')
+
+graphviz.plot(dag,shape = 'ellipse')
+```
+
 ## Conclusiones
