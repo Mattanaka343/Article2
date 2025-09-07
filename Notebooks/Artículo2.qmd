@@ -268,4 +268,13 @@ gbn3_fit = bn.fit(dag3, data = data_dags)
 ```
 
 
+# Queries
+
+Primer query dado por el doctor Diego Gutierrez:
+¿Cúal es la probablidad de tener un nivel de 200ng/ml de ferritina en la sangre de un hombre dado que está en un ambiente con 333 µg/m³ de NO2?
+
+Segundo query dado por la doctora María José:
+xs
+
+
 ## Conclusiones
