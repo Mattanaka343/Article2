@@ -319,9 +319,35 @@ cpquery(gbn3_fit,event = (FR<=200 & FR>=15),evidence = (NOx>=250))
 
 2. Propuesta por la otrrinolaringólogo Rocío Yáñez Zambrano: ¿Cuál es la probabilidad de que la concentración de hemoglobina o albúmina estén abajo de los rangos normales, o la proteína C reactiva esté arriba de los valores normales dado que la persona se encuentre en un área con emisiones de $PM_{10}$, $PM_{2.5}$ y $SO_2$ elevadas?
 ```{R}
-cpquery(gbn3_fit,event = ((HEM<=13)|(PCR>=3)|(ALBU<=3)),evidence = (PM_2_5>=160|PM_010>=320|SO_2>=200))
+score(dag3, data = continuous_data, "bic-g")
 ```
 
+### Mejor GBN con sexo
+
+```{r}
+data_sex$S <- factor(data_sex$S, levels = c(1,2))
+
+```
+
+```{R}
+dag_sex = model2network('[S][NOx][CO][SO_2][PM_010][PM_2_5][PCR|NOx:SO_2:PM_010:PM_2_5][HCST|PM_2_5:NOx:S][FR|CO:NOx:SO_2:PM_010:PM_2_5:S][HEM|CO:PCR:PM_2_5:FR:S][ALBU|PCR:PM_2_5][TFR|HEM:PCR]')
+
+graphviz.plot(dag_sex,shape = 'ellipse')
+```
+
+```{r}
+score(dag_sex, data = data_sex, "bic-cg")
+score(dag_sex, data = data_sex, "aic-cg")
+```
+
+
+### Queries
+
+Primer query dado por el doctor Diego Gutierrez:
+¿Cúal es la probablidad de tener un nivel de 200ng/ml de ferritina en la sangre de un hombre dado que está en un ambiente con 333 µg/m³ de NO2?
+
+Segundo query dado por la doctora María José:
+xs
 
 
 ## Conclusiones
