@@ -152,7 +152,7 @@ DAG 1:
 
 creemos que los indicadores más importantes que explorar dentro de la primera DAG son: HEM y PCR, ya que estos son principales indicadores de inflamación en el cuerpo y la hemoglobina es la molecula principal que transporta oxigeno y sangre al todas partes del cuerpo.
 ```{R}
-gbn1_fit = bn.fit(dag, data = data_dags)
+gbn1_fit = bn.fit(dag, data = continuous_data)
 ```
 
 
@@ -303,6 +303,24 @@ score(dag3, data = continuous_data, "bic-g")
 ```
 
 ### Mejor GBN con sexo
+```{r}
+data_sex$S <- factor(data_sex$S, levels = c(1,2))
+
+```
+
+```{R}
+dag_sex = model2network('[S][NOx][CO][SO_2][PM_010][PM_2_5][PCR|NOx:SO_2:PM_010:PM_2_5][HCST|PM_2_5:NOx:S][FR|CO:NOx:SO_2:PM_010:PM_2_5:S][HEM|CO:PCR:PM_2_5:FR:S][ALBU|PCR:PM_2_5][TFR|HEM:PCR]')
+
+graphviz.plot(dag_sex,shape = 'ellipse')
+```
+
+```{r}
+score(dag_sex, data = data_sex, "bic-cg")
+score(dag_sex, data = data_sex, "aic-cg")
+
+```
+
+
 
 ### Queries
 
