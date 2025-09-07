@@ -22,7 +22,7 @@ bibliography: ../Resources/references.bib
 
 ## Metodología
 
-&nbsp;&nbsp;&nbsp;&nbsp;Esta investigación se centró en encontrar las probabilidades de ciertos eventos que podrían ayudar a comprender mejor los efectos de la calidad del aire en la salud de la población. Para ello se utilizaron las redes bayesianas gaussianas (GBNs por sus siglas en inglés). Estas estructuras son grafos dirigidos acíclicos (DAGs por sus siglas en inglés) en los cuales todos los nodos representan variables aleatorias continuas con distribución normal y los arcos, junto con su dirección, representan dependencias condicionales. Las GBNs permiten trabajar con distribuciones condicionales locales en vez de la distribución conjunta (global)  la cual es más compleja. Las GBNs también nos dan el beneficio de poder realizar queries, una forma de inferencia para encontrar probabilidades del estilo $$\mathbb{P}(Evento|Evidencia)$$ a través de aproximaciones (con algoritmos como logic sampling o muestreo de Monte Carlo) o  de manera exacta (con algoritmos como variable elimination y junction tree) 
+&nbsp;&nbsp;&nbsp;&nbsp;Esta investigación se centró en encontrar las probabilidades de ciertos eventos que podrían ayudar a comprender mejor los efectos de la calidad del aire en la salud de la población. Para ello se utilizaron las redes bayesianas gaussianas (GBNs por sus siglas en inglés). Estas estructuras son grafos dirigidos acíclicos (DAGs por sus siglas en inglés) en los cuales todos los nodos representan variables aleatorias continuas con distribución normal y los arcos, junto con su dirección, representan dependencias condicionales. Las GBNs permiten trabajar con distribuciones condicionales locales en vez de la distribución conjunta (global) $$X \sim N_p(\mu,\Sigma)$$  la cual es más compleja. Las GBNs también nos dan el beneficio de poder realizar queries, una forma de inferencia para encontrar probabilidades del estilo $$\mathbb{P}(Evento|Evidencia)$$ a través de aproximaciones (con algoritmos como logic sampling o muestreo de Monte Carlo) o  de manera exacta (con algoritmos como variable elimination y junction tree) 
 
 &nbsp;&nbsp;&nbsp;&nbsp;Para la creación de los modelos computacionales se usaron los lenguajes R y Python. Python se usó para la limpieza y unificación de los datos, mientras que R se usó para la inferencia estadística. Los módulos necesarios para replicar esta investigación son:
 
@@ -37,11 +37,11 @@ Para R:
 - ```rgraphviz``` para graficar las dags
 - ```tidyverse``` para el manejo de datos
 
-Adicionalmente los datos usados para esta investigación provienen del Instituto Nacional de Estadística y Geografía (INEGI), con su Encuesta Nacional de Salud y Nutrición (ENSANUT), y la Secretaría del Medio Ambiente y Recursos Naturales (SEMARNAT), con sus sistemas de monitoreo de la calidad del aire.
+Adicionalmente los datos usados para esta investigación provienen del Instituto Nacional de Estadística y Geografía (INEGI), con su Encuesta Nacional de Salud y Nutrición (ENSANUT), y la Secretaría del Medio Ambiente y Recursos Naturales (SEMARNAT), con sus sistemas de monitoreo de la calidad del aire
 
 ## Aplicación
 
-Para comenzar la investigación se tomaron los archivos de la ENSANUT realizada por el INEGI y se unieron con el archivo de calidad del aire de la SEMARNAT. Se entrevistaron a varios médicos y se consultaron diversos estudios para determinar qué variables podrían resultar afectadas por cambios en la calidad del aire, y se encontró que el mayor efecto de la calidad del aire en la salud de las personas se puede notar en los sistemas respiratorio y cardiovascular. [@WHO2021AQG] Aunado a esto también se denota que los efectos de estas partículas y gases nocivos fueron más notorios en las poblaciones de hombres entre las edades de 75 a 79 y más de 80, y más fuertes a través de líneas de desarrollo socioeconómico [@10.3389/fmed.2024.1472996]. Los médicos también informan que las aflicciones más comunmente ligadas a declive en la calidad del aire son cardiopatía isquémica, enfermedad pulmonar obstructiva crónica (EPOC), asma, derrames cerebrales e incluso cancer [@WHO2021AQG]. Tomando esto en cuenta de la ase de datoos de pruebas médicas se decidió conservar únicamente las variables que la literatura sugiere tienen una correlación con estas enfermedades, que en términos de esta base de datos se trató de la proteína C reactiva, ferritina, homocisteína, transferrina, concentración de hemoglobina y albúmina que son marcadores de inflamación. Aunado a esto se decidió conservar únicamente las fuentes de área para los valores de los contaminantes en el aire debido a que estas no tienen valores nulos y casi todos los municipios tienen este tipoo de medición. Finalmente en cuanto a valores demograficos se conservaron únicamente la edad y el sexo debido a que la literatura sugiere que son factores relevantes.
+Para comenzar la investigación se tomaron los archivos de la ENSANUT realizada por el INEGI y se unieron con el archivo de calidad del aire de la SEMARNAT. Se entrevistaron a varios médicos y se consultaron diversos estudios para determinar qué variables podrían resultar afectadas por cambios en la calidad del aire, y se encontró que el mayor efecto de la calidad del aire en la salud de las personas se puede notar en los sistemas respiratorio y cardiovascular. [@WHO2021AQG] Aunado a esto también se denota que los efectos de estas partículas y gases nocivos fueron más notorios en las poblaciones de hombres entre las edades de 75 a 79 y más de 80, y más fuertes a través de líneas de desarrollo socioeconómico [@10.3389/fmed.2024.1472996]. Los médicos también informan que las aflicciones más comunmente ligadas a declive en la calidad del aire son cardiopatía isquémica, enfermedad pulmonar obstructiva crónica (EPOC), asma, derrames cerebrales e incluso cancer [@WHO2021AQG]. Tomando esto en cuenta de la ase de datoos de pruebas médicas se decidió conservar únicamente las variables que la literatura sugiere tienen una correlación con estas enfermedades, que en términos de esta base de datos se trató de la proteína C reactiva, ferritina, homocisteína, transferrina, concentración de hemoglobina y albúmina que son marcadores de inflamación. Aunado a esto se decidió conservar únicamente las fuentes de área para los valores de los contaminantes en el aire debido a que estas no tienen valores nulos y casi todos los municipios tienen este tipoo de medición. Finalmente en cuanto a valores demograficos se conservaron únicamente el sexo debido a que la literatura sugiere que son factores relevantes.
 ```{python}
 #importando librerías
 import pandas as pd #usamos pandas para el manejo de los datos
@@ -152,7 +152,7 @@ DAG 1:
 
 creemos que los indicadores más importantes que explorar dentro de la primera DAG son: HEM y PCR, ya que estos son principales indicadores de inflamación en el cuerpo y la hemoglobina es la molecula principal que transporta oxigeno y sangre al todas partes del cuerpo.
 ```{R}
-gbn1_fit = bn.fit(dag, data = data_dags)
+gbn1_fit = bn.fit(dag, data = continuous_data)
 ```
 
 
@@ -163,7 +163,7 @@ gbn1_fit$HEM
 ```
 
 ```{R}
-mod_lm = lm(HEM ~ PM_010, data = data_dags)
+mod_lm = lm(HEM ~ PM_010, data = continuous_data)
 coef(mod_lm)
 ```
 
@@ -185,7 +185,7 @@ gbn1_fit$PCR
 ```
 
 ```{R}
-mod_lm1 = lm(PCR ~ PM_2_5, data = data_dags)
+mod_lm1 = lm(PCR ~ PM_2_5, data = continuous_data)
 coef(mod_lm1)
 ```
 
@@ -282,35 +282,46 @@ ggplot(data, aes(x = PCR, y = TFR)) +
 
 La función de estas comparaciones en todas las DAGs es para explorar si un modelo lineal (GBN) tiene sentido para los datos; como podemos observar, en dichas comparaciones no tuvo tanto sentido hacer un modelo lineal, ya que no explica muy bien los datos y no abarca la mayoría de datos, muchas de estas variables cuentan con outlayers, los cuales se ven excluidos en el modelo. Para corregir esto, un modelo no parámetrico puede ser una buena opción.
 
-# BIC Y AIC de los tres modelos lineales
+# Comparando las DAGS
 
-Modelo 1:
-
-```{R}
-score(dag, data = continuous_data, "bic-g")
-```
-
-
-Modelo 2:
-```{R}
-score(dag2, data = continuous_data, "bic-g")
-```
-
-Modelo 3:
+Con las DAGs ya creadas se encontró la necesidad de comparar los modelos para ver cuál representa mejor las relaciones que existen en estos datos y constestar las preguntas de investigación. Para esto se ultilizaron las pruebas de Bayesian Information Criterion y Akaike Information Criterion.
 
 ```{R}
-score(dag3, data = continuous_data, "bic-g")
+bic_1 = score(dag, data = continuous_data, type = "bic-g")
+bic_2 = score(dag2, data = continuous_data, type = "bic-g")
+bic_3 = score(dag3,data = continuous_data, type = 'bic-g')
+
+data.frame(DAG1 = bic_1, DAG2 = bic_2, DAG3 = bic_3)
 ```
 
-### Mejor GBN con sexo
+Después de calcular estos puntajes usando la prueba de BIC se denotó que las 3 DAGs puntuaron de forma bastante similar con la última siendo únicamente ligermanete mejor que las otras 2.
+```{R}
+aic_1 = score(dag, data = continuous_data, type = "aic-g")
+aic_2 = score(dag2, data = continuous_data, type = "aic-g")
+aic_3 = score(dag3,data = continuous_data, type = 'aic-g')
+
+data.frame(DAG1 = aic_1, DAG2 = aic_2, DAG3 = aic_3)
+```
+De la misma forma usando el AIC se notó que el mejor puntaje era aquel de la tercera DAG pero únicamente márginalmente. 
+
+Tomando esta información en cuenta se decidió que la estructura a utilizar para las preguntas de investigación sería alguna versión de la tercera DAG.
+
+### Mejor GBN incluyendo el sexo
 
 ### Queries
 
-Primer query dado por el doctor Diego Gutierrez:
-¿Cúal es la probablidad de tener un nivel de 200ng/ml de ferritina en la sangre de un hombre dado que está en un ambiente con 333 µg/m³ de NO2?
+Finalmente después de incluír el sexo se procedió a responder las preguntas de investigación propuestas por los médicos consultados, estas fueron las siguientes:
 
-Segundo query dado por la doctora María José:
-xs
+1. Propuesta por el cardiólogo Diego Gutierrez González: ¿Cúal es la probablidad de tener un nivel irregular de ferritina en la sangre de un hombre dado que está en un estado en el que se liberaron al menos ?
+```{R}
+cpquery(gbn3_fit,event = (FR<=200 & FR>=15),evidence = (NOx>=250))
+```
+
+2. Propuesta por la otrrinolaringólogo Rocío Yáñez Zambrano: ¿Cuál es la probabilidad de que la concentración de hemoglobina o albúmina estén abajo de los rangos normales, o la proteína C reactiva esté arriba de los valores normales dado que la persona se encuentre en un área con emisiones de $PM_{10}$, $PM_{2.5}$ y $SO_2$ elevadas?
+```{R}
+cpquery(gbn3_fit,event = ((HEM<=13)|(PCR>=3)|(ALBU<=3)),evidence = (PM_2_5>=160|PM_010>=320|SO_2>=200))
+```
+
 
 
 ## Conclusiones
