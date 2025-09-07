@@ -343,11 +343,16 @@ score(dag_sex, data = data_sex, "aic-cg")
 
 ### Queries
 
-Primer query dado por el doctor Diego Gutierrez:
-¿Cúal es la probablidad de tener un nivel de 200ng/ml de ferritina en la sangre de un hombre dado que está en un ambiente con 333 µg/m³ de NO2?
+Finalmente después de incluír el sexo se procedió a responder las preguntas de investigación propuestas por los médicos consultados, estas fueron las siguientes:
 
-Segundo query dado por la doctora María José:
-xs
+1. Propuesta por el cardiólogo Diego Gutierrez González: ¿Cúal es la probablidad de tener un nivel irregular de ferritina en la sangre de un hombre dado que está en un estado en el que se liberaron al menos ?
+```{R}
+cpquery(gbn3_fit,event = (FR<=200 & FR>=15),evidence = (NOx>=250))
+```
 
+2. Propuesta por la otrrinolaringólogo Rocío Yáñez Zambrano: ¿Cuál es la probabilidad de que la concentración de hemoglobina o albúmina estén abajo de los rangos normales, o la proteína C reactiva esté arriba de los valores normales dado que la persona se encuentre en un área con emisiones de $PM_{10}$, $PM_{2.5}$ y $SO_2$ elevadas?
+```{R}
+cpquery(gbn3_fit,event = ((HEM<=13)|(PCR>=3)|(ALBU<=3)),evidence = (PM_2_5>=160|PM_010>=320|SO_2>=200))
+```
 
 ## Conclusiones
