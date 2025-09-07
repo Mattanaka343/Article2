@@ -102,6 +102,12 @@ data.drop(columns = ['entidad1','municipio1'],inplace=True)
 
 #Generamos un archivo csv con los datos limpios
 data.to_csv('../Data/data.csv', index=False)
+
+columns_dags = ['HEM','ALBU','PCR','HCST','TFR','FR','SO_2','CO','NOx','PM_010','PM_2_5']
+data_dags = data[columns_dags]
+data_dags.to_csv('../Data/data_dags.csv', index=False)
+
+data_dags.head()
 ```
 
 ### Construyendo Las DAGS
@@ -112,6 +118,7 @@ library(bnlearn)
 library(tidyverse)
 
 data = read_csv("../Data/data.csv")
+data_dags = read_csv("../Data/data_dags.csv")
 
 dag = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][TFR][FR|NOx:TFR][PCR|NOx:SO_2:PM_010:PM_2_5][HEM|NOx:CO:PCR:PM_010][ALBU|PCR][HCST|SO_2:NOx:PM_010]')
 
@@ -125,9 +132,140 @@ La estructura de la segunda DAG propuesta fue basada en una investigación de la
 Aqui el segundo DAG:
 
 ```{R}
-dag = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][FR|NOx:SO_2:PM_010:PM_2_5][HEM|SO_2:CO:PM_010:PM_2_5][PCR|NOx:SO_2:PM_010][HCST|PM_010:PM_2_5][TFR|FR][ALBU|HEM:PM_2_5]')
+dag2 = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][FR|NOx:SO_2:PM_010:PM_2_5][HEM|SO_2:CO:PM_010:PM_2_5][PCR|NOx:SO_2:PM_010][HCST|PM_010:PM_2_5][TFR|FR][ALBU|HEM:PM_2_5]')
 
-graphviz.plot(dag,shape = 'ellipse')
+graphviz.plot(dag2,shape = 'ellipse')
 ```
+En el esquema se observa que el PM₂.₅ ejerce un efecto directo sobre la homocisteína (HCST), la hemoglobina (HEM) y la albúmina (ALBU), reflejando su impacto tanto en procesos inflamatorios como en la oxigenación y el transporte de moléculas. A su vez, contaminantes como el CO y el PM₁₀ también influyen en la hemoglobina y en variables respiratorias (FR), mientras que el SO₂ y los NOx muestran una fuerte asociación con la proteína C reactiva (PCR), marcador clave de inflamación sistémica. Finalmente, el diagrama integra cómo estas alteraciones pueden repercutir en funciones secundarias, como la regulación del receptor de transferrina (TFR), vinculando la exposición ambiental con desequilibrios hematológicos y metabólicos. En conjunto, el DAG sintetiza la evidencia epidemiológica y clínica que indica que los contaminantes del aire afectan directamente a biomarcadores centrales en procesos inflamatorios, cardiovasculares y hematológicos.
+
+La estructura de la tercera DAG fue creada en colaboración con la doctora María José Pavía, dicha estructura se ve de la siguiente forma:
+
+```{R}
+dag3 = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][PCR|NOx:SO_2:PM_010:PM_2_5][HCST|PM_2_5:NOx][FR|CO:NOx:SO_2:PM_010:PM_2_5][HEM|CO:PCR:PM_2_5:FR][ALBU|PCR:PM_2_5][TFR|HEM:PCR]')
+
+graphviz.plot(dag3,shape = 'ellipse')
+```
+El DAG propuesto representa cómo diferentes contaminantes atmosféricos impactan en biomarcadores hematológicos e inflamatorios. En él se observa que NOx, SO₂, PM₁₀ y PM₂.₅ se asocian directamente con la proteína C reactiva (PCR), reflejando su papel como marcadores de inflamación sistémica. El PM₂.₅ y los NOx también influyen en la homocisteína (HCST), vinculada con daño endotelial y riesgo cardiovascular. La frecuencia respiratoria (FR) se ve alterada por la exposición a CO, NOx, SO₂, PM₁₀ y PM₂.₅, lo que condiciona la oxigenación y repercute en la hemoglobina (HEM). Esta última se afecta de forma directa por el CO (formación de carboxihemoglobina), por el aumento de la PCR (anemia inflamatoria), por el PM₂.₅ y por cambios en la función respiratoria. A su vez, la albúmina (ALBU) disminuye en presencia de inflamación (PCR elevada) y por efecto del PM₂.₅, mientras que el receptor de transferrina (TFR) se regula por los niveles de hemoglobina y PCR, integrando el eje de anemia e inflamación. En conjunto, el diagrama sintetiza cómo la exposición a contaminantes se traduce en respuestas inflamatorias y hematológicas interrelacionadas.
+
+### Ajustando una GBN para cada DAG
+
+Ajustamos una GBN para los DAGs:
+
+```{R}
+library(ggplot2)
+```
+
+
+DAG 1:
+
+creemos que los indicadores más importantes que explorar dentro de la primera DAG son: HEM y PCR, ya que estos son principales indicadores de inflamación en el cuerpo y la hemoglobina es la molecula principal que transporta oxigeno y sangre al todas partes del cuerpo.
+```{R}
+gbn1_fit = bn.fit(dag, data = data_dags)
+```
+
+
+Con el primero compararemos los niveles de hemoglobina con las partículas PM_010, porqué? Además de que las partículas PM_010 son nodo padre de la hemoglobina, según los expertos, son el contamiante que más llega a afectar a la hemoglobina. Dicho esto los compararemos:
+
+```{R}
+gbn1_fit$HEM
+```
+
+```{R}
+mod_lm = lm(HEM ~ PM_010, data = data_dags)
+coef(mod_lm)
+```
+
+
+```{R}
+ggplot(data, aes(x = PM_010, y = HEM)) +
+  geom_point(color = "steelblue", alpha = 0.3) +
+  geom_smooth(method = lm, se = FALSE, lwd = 2, color = "dodgerblue") +
+  labs(x = "PM_010", y = "HEM", title = "") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", margin = margin(0, 0, 5, 0)),
+        axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold", angle = 90))
+```
+Con el PCR, lo compararemos con el PM_2_5, el cual es uno de los contaminantes que más afecta al PCR, según los expertos, y es peor que el PM_010.
+
+```{R}
+gbn1_fit$PCR
+```
+
+```{R}
+mod_lm = lm(PCR ~ PM_2_5, data = data_dags)
+coef(mod_lm)
+```
+
+
+```{R}
+ggplot(data, aes(x = PM_2_5, y = PCR)) +
+  geom_point(color = "steelblue", alpha = 0.3) +
+  geom_smooth(method = lm, se = FALSE, lwd = 2, color = "dodgerblue") +
+  labs(x = "PM_2_5", y = "Proteína C reactiva", title = "") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", margin = margin(0, 0, 5, 0)),
+        axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold", angle = 90))
+```
+
+
+
+DAG 2:
+
+Para el sgundo DAG, estaremos explorando 2 indicadores diferentes que el primer DAG, más no menos importantes, en este caso exploraremos la ferrenina y la albunina. La ferrenina dado NO2 y la albunina dado las partículas PM_2_5, esto porque, según los expertos, son los coantaminates que más llegan a afectar a dichos indicadores sanguineos.
+```{R}
+gbn2_fit = bn.fit(dag2, data = data_dags)
+```
+
+```{R}
+gbn2_fit$FR
+```
+
+```{R}
+mod_lm = lm(FR ~ NOx, data = data_dags)
+coef(mod_lm)
+```
+
+```{R}
+ggplot(data, aes(x = NOx, y = FR)) +
+  geom_point(color = "steelblue", alpha = 0.3) +
+  geom_smooth(method = lm, se = FALSE, lwd = 2, color = "dodgerblue") +
+  labs(x = "Dióxido de nitrógeno", y = "Ferrenina", title = "") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", margin = margin(0, 0, 5, 0)),
+        axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold", angle = 90))
+```
+
+
+
+```{R}
+gbn2_fit$ALBU
+```
+
+
+```{R}
+mod_lm = lm(ALBU ~ PM_2_5, data = data_dags)
+coef(mod_lm)
+```
+
+```{R}
+ggplot(data, aes(x = PM_2_5, y = ALBU)) +
+  geom_point(color = "steelblue", alpha = 0.3) +
+  geom_smooth(method = lm, se = FALSE, lwd = 2, color = "dodgerblue") +
+  labs(x = "PM_2_5", y = "Albunina", title = "") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", margin = margin(0, 0, 5, 0)),
+        axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold", angle = 90))
+```
+
+
+DAG 3:
+```{R}
+gbn3_fit = bn.fit(dag3, data = data_dags)
+```
+
 
 ## Conclusiones
