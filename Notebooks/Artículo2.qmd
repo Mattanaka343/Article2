@@ -107,7 +107,14 @@ columns_dags = ['HEM','ALBU','PCR','HCST','TFR','FR','SO_2','CO','NOx','PM_010',
 data_dags = data[columns_dags]
 data_dags.to_csv('../Data/data_dags.csv', index=False)
 
-data_dags.head()
+# === Agregar la columna de sexo (h0302) al data_dags ===
+# Nota: 'h0302' ya está dentro de 'data' pero renombrada como 'S'
+data_dags_con_sexo = pd.concat([data_dags, data[['S']].rename(columns={'S': 'h0302'})], axis=1)
+data_dags_con_sexo = data_dags_con_sexo.rename(columns={'h0302': 'sexo'})
+data_dags_con_sexo.to_csv('../Data/data_dags_con_sexo.csv', index=False)
+
+
+
 ```
 
 ### Construyendo Las DAGS
@@ -193,8 +200,8 @@ gbn1_fit$PCR
 ```
 
 ```{R}
-mod_lm = lm(PCR ~ PM_2_5, data = data_dags)
-coef(mod_lm)
+mod_lm1 = lm(PCR ~ PM_2_5, data = data_dags)
+coef(mod_lm1)
 ```
 
 
@@ -223,8 +230,8 @@ gbn2_fit$FR
 ```
 
 ```{R}
-mod_lm = lm(FR ~ NOx, data = data_dags)
-coef(mod_lm)
+mod_lm2 = lm(FR ~ NOx, data = data_dags)
+coef(mod_lm2)
 ```
 
 ```{R}
@@ -246,8 +253,8 @@ gbn2_fit$ALBU
 
 
 ```{R}
-mod_lm = lm(ALBU ~ PM_2_5, data = data_dags)
-coef(mod_lm)
+mod_lm3 = lm(ALBU ~ PM_2_5, data = data_dags)
+coef(mod_lm3)
 ```
 
 ```{R}
@@ -263,10 +270,54 @@ ggplot(data, aes(x = PM_2_5, y = ALBU)) +
 
 
 DAG 3:
+Con el tercer DAG solo exploraremos un indicador: la transferrina. Esto porque esta afectada por la mayoría de contaminantes dado sus padres, lo cuales son indicadores tambíen.
 ```{R}
 gbn3_fit = bn.fit(dag3, data = data_dags)
 ```
 
+```{R}
+gbn3_fit$TFR
+```
+
+```{R}
+mod_lm4 = lm(TFR ~ PCR, data = data_dags)
+coef(mod_lm4)
+```
+
+```{R}
+ggplot(data, aes(x = PCR, y = TFR)) +
+  geom_point(color = "steelblue", alpha = 0.3) +
+  geom_smooth(method = lm, se = FALSE, lwd = 2, color = "dodgerblue") +
+  labs(x = "Proteína C reactiva", y = "Transferrina", title = "") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", margin = margin(0, 0, 5, 0)),
+        axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold", angle = 90))
+```
+
+La función de estas comparaciones en todas las DAGs es para explorar si un modelo lineal (GBN) tiene sentido para los datos; como podemos observar, en dichas comparaciones no tuvo tanto sentido hacer un modelo lineal, ya que no explica muy bien los datos y no abarca la mayoría de datos, muchas de estas variables cuentan con outlayers, los cuales se ven excluidos en el modelo. Para corregir esto, un modelo no parámetrico puede ser una buena opción.
+
+# BIC Y AIC de los tres modelos lineales
+
+Modelo 1:
+
+```{R}
+score(dag, data = data_dags, "bic-g")
+```
+
+
+Modelo 2:
+```{R}
+score(dag2, data = data_dags, "bic-g")
+```
+
+Modelo 3:
+
+```{R}
+score(dag3, data = data_dags, "bic-g")
+```
+
+# Mejor GBN con sexo
 
 # Queries
 
