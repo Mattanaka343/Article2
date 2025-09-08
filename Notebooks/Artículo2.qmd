@@ -40,11 +40,11 @@ Para R:
 - ```mgcv``` para los modelos no paramétricos
 - ```gratia``` para los modelos no paramétricos
 
-Adicionalmente los datos usados para esta investigación provienen del Instituto Nacional de Estadística y Geografía (INEGI), con su Encuesta Nacional de Salud y Nutrición (ENSANUT), y la Secretaría del Medio Ambiente y Recursos Naturales (SEMARNAT), con sus sistemas de monitoreo de la calidad del aire
+Adicionalmente los datos usados para esta investigación provienen del Instituto Nacional de Estadística y Geografía (INEGI), con su Encuesta Nacional de Salud y Nutrición (ENSANUT), y la Secretaría del Medio Ambiente y Recursos Naturales (SEMARNAT), con sus sistemas de monitoreo de la calidad del aire.
 
 ## Aplicación
 
-Para comenzar la investigación se tomaron los archivos de la ENSANUT realizada por el INEGI y se unieron con el archivo de calidad del aire de la SEMARNAT. Se entrevistaron a varios médicos y se consultaron diversos estudios para determinar qué variables podrían resultar afectadas por cambios en la calidad del aire, y se encontró que el mayor efecto de la calidad del aire en la salud de las personas se puede notar en los sistemas respiratorio y cardiovascular. [@WHO2021AQG] Aunado a esto también se denota que los efectos de estas partículas y gases nocivos fueron más notorios en las poblaciones de hombres entre las edades de 75 a 79 y más de 80, y más fuertes a través de líneas de desarrollo socioeconómico [@10.3389/fmed.2024.1472996]. Los médicos también informan que las aflicciones más comunmente ligadas a declive en la calidad del aire son cardiopatía isquémica, enfermedad pulmonar obstructiva crónica (EPOC), asma, derrames cerebrales e incluso cancer [@WHO2021AQG]. Tomando esto en cuenta de la ase de datoos de pruebas médicas se decidió conservar únicamente las variables que la literatura sugiere tienen una correlación con estas enfermedades, que en términos de esta base de datos se trató de la proteína C reactiva, ferritina, homocisteína, transferrina, concentración de hemoglobina y albúmina que son marcadores de inflamación. Aunado a esto se decidió conservar únicamente las fuentes de área para los valores de los contaminantes en el aire debido a que estas no tienen valores nulos y casi todos los municipios tienen este tipoo de medición. Finalmente en cuanto a valores demograficos se conservaron únicamente el sexo debido a que la literatura sugiere que son factores relevantes.
+Para comenzar la investigación se tomaron los archivos de la ENSANUT realizada por el INEGI y se unieron con el archivo de calidad del aire de la SEMARNAT. Se entrevistaron a varios médicos y se consultaron diversos estudios para determinar qué variables podrían resultar afectadas por cambios en la calidad del aire, y se encontró que el mayor efecto de la calidad del aire en la salud de las personas se puede notar en los sistemas respiratorio y cardiovascular. [@WHO2021AQG] Aunado a esto también se denota que los efectos de estas partículas y gases nocivos fueron más notorios en las poblaciones de hombres entre las edades de 75 a 79 y más de 80, y más fuertes a través de líneas de desarrollo socioeconómico [@10.3389/fmed.2024.1472996]. Los médicos también informan que las aflicciones más comúnmente ligadas a declive en la calidad del aire son cardiopatía isquémica, enfermedad pulmonar obstructiva crónica (EPOC), asma, derrames cerebrales e incluso cáncer [@WHO2021AQG]. Tomando esto en cuenta de la base de datos de pruebas médicas, se decidió conservar únicamente las variables que la literatura sugiere tienen una correlación con estas enfermedades, que en términos de esta base de datos se trató de la proteína C reactiva, ferritina, homocisteína, transferrina, concentración de hemoglobina y albúmina, que son marcadores de inflamación. Sumado a esto se decidió conservar únicamente las fuentes de área para los valores de los contaminantes en el aire, debido a que estas no tienen valores nulos y casi todos los municipios tienen este tipo de medición. Finalmente en cuanto a valores demográficos se conservaron únicamente el sexo en vista de que la literatura sugiere que son factores relevantes.
 ```{python}
 #importando librerías
 import pandas as pd #usamos pandas para el manejo de los datos
@@ -126,10 +126,11 @@ dag = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][TFR][FR|NOx:TFR][PCR|NOx:SO
 graphviz.plot(dag,shape = 'ellipse')
 ```
 
-Esta estructura fue propuesta basandose en investigación y una entrevista con la otorrinolaringólogo Rocío Yáñez Zambrano. 
-En esta se propone que todos los contaminantes son independientes entre ellos junto con la transferrina (TFR). La transferrina junto con los niveles de óxidos de nitrógeno ($NO_x$) en el ambiente informan la cantidad de ferritina (FR) en la sangre. Las partículas con diámetro menor o igual a 10 micrómetros ($PM_{10}$) y 2.5 micrómetros ($PM_{2.5}$) junto con la cantidad de $NO_x$ y dióxido de azufre ($SO_2$) denotan el valor de proteína C reactiva (PCR) en la sangre que informa la concentración de hemoglobina (HEM), en conjunto con el monóxido de carbono ($CO$), y valores de albúmina (ALBU) en la sangre. Finalmente, las $PM_{10}$ junto con las cantidades de $NO_x$ y $SO_2$ condicionan los valores de homocisteína (HCST) en la sangre.
+Esta estructura fue propuesta basándose en la investigación y en una entrevista con la otorrinolaringólogo Rocío Yáñez Zambrano. 
 
-La estructura de la segunda DAG propuesta fue basada en una investigación de la mano del cardiologo intervencionista Diego Guitierrez González, quien con su ayuda se encontraron relaciones entre los contaminates y los diferentes marcadores de inflamación. Es importante recalcar que también se considero que los contaminates son independientes, aunque no son producidos por alguno de los marcadores en la sangre, o de manera general el cuerpo, estos sí son usados o injeridos por el cuerpo, por lo cual afectan a los marcadores de la inflamación.
+En esta se propone que todos los contaminantes son independientes entre ellos junto con la transferrina (TFR). La transferrina en conjunto con los niveles de óxidos de nitrógeno ($NO_x$) en el ambiente informan la cantidad de ferritina (FR) en la sangre. Las partículas con diámetro menor o igual a 10 micrómetros ($PM_{10}$) y 2.5 micrómetros ($PM_{2.5}$) junto con la cantidad de $NO_x$ y dióxido de azufre ($SO_2$) denotan el valor de proteína C reactiva (PCR) en la sangre que representa la concentración de hemoglobina (HEM), en conjunto con el monóxido de carbono ($CO$), y valores de albúmina (ALBU) en la sangre. Finalmente, las $PM_{10}$ junto con las cantidades de $NO_x$ y $SO_2$ condicionan los valores de homocisteína (HCST) en la sangre.
+
+La estructura de la segunda DAG propuesta fue basada en una investigación de la mano del cardiologo intervencionista Diego Guitierrez González, quien con su ayuda se encontraron relaciones entre los contaminates y los diferentes marcadores de inflamación. Es importante recalcar que también se consideró que los contaminates son independientes, aunque no son producidos por alguno de los marcadores en la sangre, o de manera general en el cuerpo, estos sí son usados o ingeridos por el cuerpo, por lo cual afectan a los marcadores de la inflamación.
 ```{R}
 dag2 = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][FR|NOx:SO_2:PM_010:PM_2_5][HEM|SO_2:CO:PM_010:PM_2_5][PCR|NOx:SO_2:PM_010][HCST|PM_010:PM_2_5][TFR|FR][ALBU|HEM:PM_2_5]')
 
@@ -237,7 +238,7 @@ Después de ralizar todos estos análisis se decidio que una GBN linear (LGBN) n
 
 ### Comparando las DAGS
 
-Con las DAGs ya creadas se encontró la necesidad de comparar los modelos para ver cuál representa mejor las relaciones que existen en estos datos y constestar las preguntas de investigación. Para esto se ultilizaron las pruebas de Bayesian Information Criterion y Akaike Information Criterion.
+Con las DAGs ya creadas se encontró la necesidad de comparar los modelos para ver cuál representa mejor las relaciones que existen en estos datos y constestar las preguntas de investigación. Para esto se ultilizaron las pruebas de Bayesian Information Criterion (BIC) y Akaike Information Criterion (AIC).
 
 ```{R}
 bic_1 = score(dag, data = continuous_data, type = "bic-g")
@@ -247,7 +248,7 @@ bic_3 = score(dag3,data = continuous_data, type = 'bic-g')
 data.frame(DAG1 = bic_1, DAG2 = bic_2, DAG3 = bic_3)
 ```
 
-Después de calcular estos puntajes usando la prueba de BIC se denotó que las 3 DAGs puntuaron de forma bastante similar con la última siendo únicamente ligermanete mejor que las otras 2.
+Después de calcular estos puntajes usando la prueba de BIC se denotó que las 3 DAGs puntuaron de forma bastante similar con la última siendo ligeramente mejor que las otras 2.
 ```{R}
 aic_1 = score(dag, data = continuous_data, type = "aic-g")
 aic_2 = score(dag2, data = continuous_data, type = "aic-g")
@@ -255,13 +256,13 @@ aic_3 = score(dag3,data = continuous_data, type = 'aic-g')
 
 data.frame(DAG1 = aic_1, DAG2 = aic_2, DAG3 = aic_3)
 ```
-De la misma forma usando el AIC se notó que el mejor puntaje era aquel de la tercera DAG pero únicamente márginalmente. 
+De la misma forma usando el AIC se notó que el mejor puntaje era aquel de la tercera DAG pero solo de manera marginal
 
 Tomando esta información en cuenta se decidió que la estructura a utilizar para las preguntas de investigación sería alguna versión de la tercera DAG.
 
 ### Mejor GBN incluyendo el sexo
 
-Tras comparar las DAGs se coonsideró construír un cuarto modelo en el que se incluye el sexo. 
+Tras comparar las DAGs se consideró construír un cuarto modelo en el que se incluye el sexo. 
 ```{R}
 data_sex$S <- factor(data_sex$S, levels = c(1,2))
 
@@ -283,7 +284,7 @@ El desempeño de esta DAG fue peor que el desempeño de la versióon que obvia e
 
 ### Queries
 
-Finalmente después de incluír el sexo se procedió a responder las preguntas de investigación propuestas por los médicos consultados, estas fueron las siguientes:
+Finalmente después de incluir el sexo se procedió a responder las preguntas de investigación propuestas por los médicos consultados, estas fueron las siguientes:
 
 1. Propuesta por el cardiólogo Diego Gutierrez González: ¿Cúal es la probablidad de que una persona tenga un nivel irregular de ferritina dado que está en una localidad en el que se liberaron al menos 250 toneladas de $NO_x$ al año?
 ```{R}
