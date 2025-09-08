@@ -336,3 +336,5 @@ cpquery(gbn3_fit,event = (ALBU>=3 & ALBU<=5.4),evidence = (NOx<=60|PM_010<=100|S
   - Este evento también tiene una probabilidad bastante alta, de alrededoor de 74% sugiriendo que la mayoría de personas en áreas de poca exposición a estos contaminantes se encuentra saludable
   
 ## Conclusiones
+
+
