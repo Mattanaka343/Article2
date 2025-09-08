@@ -302,7 +302,7 @@ cpquery(gbn3_fit,event = ((HEM<=13)|(PCR>=3)|(ALBU<=3)),evidence = (PM_2_5>=160|
   
 3. Propuesta por la doctora María José Pavía: ¿Cual es la probabilidad de que la albúmina en la sangre de una presona se encuentre en un rango normal dado que los niveles de $NOx$, $PM_{10}$ y $SO_2$ son bajos?
 ```{R}
-cpquery(gbn3_fit,event = (ALBU>=3 & ALBU<=5.4),evidence = (NOx<=60|PM_010<=10000|SO_2<=75))
+cpquery(gbn3_fit,event = (ALBU>=3 & ALBU<=5.4),evidence = (NOx<=60|PM_010<=100|SO_2<=75))
 ```
 
 ## Conclusiones
