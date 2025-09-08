@@ -1,34 +1,43 @@
 ---
-title: Contaminación Ambiental y Sus Efectos en la Salud de los Mexicanos
+title: "Contaminación Ambiental y Sus Efectos en la Salud de los Mexicanos"
 author: 
-- Mateo Yáñez-Tanaka
-- Fernando Ramos-Valdez 
-- Fernando Pavía-González
-- Jorge Sánchez-Ponce
+  - Mateo Yáñez-Tanaka
+  - Fernando Ramos-Valdez 
+  - Fernando Pavía-González
+  - Jorge Sánchez-Ponce
 format:
-   html:
-     toc: true
-     html-math-method: katex
-     embed-resources: true
-     self-contained-math: true
-     df-print: kable
+  html:
+    toc: true
+    html-math-method: katex
+    embed-resources: true
+    self-contained-math: true
+    df-print: kable
+  pdf:
+    toc: true
+    documentclass: article
+    number-sections: true
+    df-print: kable
+    include-in-header: ../Resources/header.tex
 editor: source
 bibliography: ../Resources/references.bib
 ---
+
 ```{R}
 #| include: false
 knitr::opts_chunk$set(echo = FALSE)
 
 ```
 ## Abstract
-La contaminación atmosférica es un determinante clave de la salud pública, con impactos diferenciales sobre procesos inflamatorios, respiratorios y cardiovasculares. Este estudio integra microdatos biomédicos de la Encuesta Nacional de Salud y Nutrición (ENSANUT) y registros de calidad del aire de la SEMARNAT para explorar la relación entre emisiones de contaminantes (NOx, CO, SO₂, PM₁₀ y PM₂.₅) y biomarcadores séricos (PCR, ferritina, homocisteína, transferrina, hemoglobina y albúmina) en población mexicana. Tras una etapa de limpieza y unificación en Python, se entrenaron Redes Bayesianas Gaussianas (GBN) en R para proponer y comparar tres estructuras causales (DAGs) informadas por literatura y entrevistas clínicas. La comparación mediante BIC y AIC favoreció marginalmente la tercera estructura; los modelos lineales simples mostraron bajo ajuste, sugiriendo la conveniencia de enfoques no paramétricos. Consultas probabilísticas (cpquery) indicaron, por ejemplo, alta probabilidad de niveles dentro de rango de ferritina bajo emisiones elevadas de NOx y mayor probabilidad de inflamación (PCR elevada o descenso de HEM/ALBU) bajo cargas altas de PM y SO₂. Los resultados apoyan el uso de GBN para inferencia probabilística y priorización de riesgos, y orientan futuras extensiones con modelos no paramétricos y estratificación demográfica.
+
+La contaminación atmosférica es un determinante clave de la salud pública, con impactos diferenciales sobre procesos inflamatorios, respiratorios y cardiovasculares. Este estudio integra microdatos biomédicos de la Encuesta Nacional de Salud y Nutrición (ENSANUT) y registros de calidad del aire de la SEMARNAT para explorar la relación entre emisiones de contaminantes ($NO_x$, $CO$, $SO_2$, $PM_{10}$ y $PM_{2.5}$) y biomarcadores séricos (Proteína C reactiva, ferritina, homocisteína, transferrina, hemoglobina y albúmina) en población mexicana. Tras una etapa de limpieza y unificación en Python, se entrenaron Redes Bayesianas Gaussianas (GBN) en R para proponer y comparar tres estructuras causales (DAGs) informadas por literatura y entrevistas clínicas. La comparación mediante *Bayesian Information Criterion* (BIC) y *Akaike Information Criterion* (AIC) favoreció marginalmente la tercera estructura; los modelos lineales simples mostraron bajo ajuste, sugiriendo la conveniencia de enfoques no paramétricos. Consultas probabilísticas (*queries*) indicaron, alta probabilidad de niveles fuera de rango de ferritina bajo emisiones elevadas de $NO_x$ y mayor probabilidad de inflamación (PCR elevada o descenso de HEM/ALBU) bajo cargas altas de $PM_{2.5}$, $PM_{10}$ y $SO_2$. Los resultados apoyan el uso de GBN para inferencia probabilística y priorización de riesgos, y orientan futuras extensiones con modelos no paramétricos y estratificación demográfica.
 
 Palabras clave: calidad del aire, biomarcadores, redes bayesianas gaussianas, ENSANUT, SEMARNAT, BIC, AIC.
 
 ## Introducción
 La contaminación atmosférica constituye uno de los principales riesgos ambientales para la salud, con efectos que trascienden el aparato respiratorio e inciden en procesos inflamatorios sistémicos y eventos cardiovasculares. En el contexto mexicano, la heterogeneidad regional de las emisiones —impulsada por fuentes móviles, industriales y de área— convive con variabilidad sociodemográfica y de acceso a servicios de salud, lo que complejiza la identificación de relaciones entre exposición y daño biológico. Comprender estos vínculos requiere herramientas que integren múltiples contaminantes y biomarcadores bajo supuestos transparentes de dependencia condicional y permitan responder preguntas clínicas y de política pública de forma probabilística.
 
-Este trabajo aborda dicha necesidad mediante la integración de dos fuentes nacionales: (i) la ENSANUT, que aporta mediciones individuales de biomarcadores relacionados con inflamación y estado hematológico (proteína C reactiva, ferritina, homocisteína, transferrina, hemoglobina y albúmina), y (ii) los registros de SEMARNAT sobre emisiones y concentraciones de contaminantes criterio (NOx, CO, SO₂, PM₁₀ y PM₂.₅), priorizando fuentes de área por su mayor cobertura municipal y menor proporción de valores faltantes. La unificación, limpieza y armonización de ambas bases se realizaron en Python, garantizando consistencia semántica y numérica entre entidades y municipios.
+Este trabajo aborda dicha necesidad mediante la integración de dos fuentes nacionales: 
+(i) la ENSANUT, que aporta mediciones individuales de biomarcadores relacionados con inflamación y estado hematológico (proteína C reactiva, ferritina, homocisteína, transferrina, hemoglobina y albúmina), y (ii) los registros de SEMARNAT sobre emisiones y concentraciones de contaminantes criterio ($NO_x$, $CO$, $SO_2$, $PM_{10}$ y $PM_{2.5}$), priorizando fuentes de área por su mayor cobertura municipal y menor proporción de valores faltantes. La unificación, limpieza y armonización de ambas bases se realizaron en Python, garantizando consistencia semántica y numérica entre entidades y municipios.
 
 Metodológicamente, se emplearon Redes Bayesianas Gaussianas (GBN) para modelar la estructura de dependencias entre contaminantes y biomarcadores. Las GBN representan una aproximación idónea cuando se asume normalidad multivariada y se desea descomponer la distribución conjunta en relaciones locales entre nodos, capturadas en un grafo dirigido acíclico (DAG). A partir de revisión de literatura y entrevistas con especialistas clínicos (otorrinolaringología y cardiología), se propusieron tres estructuras alternativas que codifican hipótesis sobre cómo los contaminantes impactan marcadores de inflamación, oxigenación y metabolismo del hierro. Posteriormente, las estructuras se ajustaron y compararon con criterios de información BIC y AIC, y se evaluaron consultas probabilísticas (cpquery) relevantes para la práctica clínica (p. ej., probabilidades de permanecer en rangos normales o de presentar signos de inflamación bajo distintos escenarios de exposición).
 
@@ -36,9 +45,9 @@ Los resultados muestran que: (1) los modelos lineales simples entre pares (conta
 
 ## Metodología
 
-&nbsp;&nbsp;&nbsp;&nbsp;Esta investigación se centró en encontrar las probabilidades de ciertos eventos que podrían ayudar a comprender mejor los efectos de la calidad del aire en la salud de la población. Para ello se utilizaron las redes bayesianas gaussianas (GBNs por sus siglas en inglés). Estas estructuras son grafos dirigidos acíclicos (DAGs por sus siglas en inglés) en los cuales todos los nodos representan variables aleatorias continuas con distribución normal y los arcos, junto con su dirección, representan dependencias condicionales. Las GBNs permiten trabajar con distribuciones condicionales locales en vez de la distribución conjunta (global) $$X \sim N_p(\mu,\Sigma)$$  la cual es más difícil de estimar. Las GBNs también nos dan el beneficio de poder realizar queries, una forma de inferencia para encontrar probabilidades del estilo $$\mathbb{P}(Evento|Evidencia)$$ a través de aproximaciones (con algoritmos como logic sampling o muestreo de Monte Carlo) o  de manera exacta (con algoritmos como variable elimination y junction tree) 
+Esta investigación se centró en encontrar las probabilidades de ciertos eventos que podrían ayudar a comprender mejor los efectos de la calidad del aire en la salud de la población. Para ello se utilizaron las redes bayesianas gaussianas (GBNs por sus siglas en inglés). Estas estructuras son grafos dirigidos acíclicos (DAGs por sus siglas en inglés) en los cuales todos los nodos representan variables aleatorias continuas con distribución normal y los arcos, junto con su dirección, representan dependencias condicionales. Las GBNs permiten trabajar con distribuciones condicionales locales en vez de la distribución conjunta (global) $$X \sim N_p(\mu,\Sigma)$$  la cual es más difícil de estimar. Las GBNs también nos dan el beneficio de poder realizar queries, una forma de inferencia para encontrar probabilidades del estilo $$\mathbb{P}(Evento|Evidencia)$$ a través de aproximaciones (con algoritmos como logic sampling o muestreo de Monte Carlo) o  de manera exacta (con algoritmos como variable elimination y junction tree). Aunado a esto se utilizaron el *Akaike Information Criterion* (AIC), dado por $$AIC = 2k - 2\ell(\hat{\theta};x)$$ y *Bayesian Information Criterion* dado por $$BIC = k\log(n)-2\ell(\hat{\theta};x)$$ para puntuar y comparar los modelos. En estos $k$ es la cantidad de parámetros del modelo, $n$ es el tamaño de la muestra y $\ell(\hat{\theta};x)$ es la log-verosimilitud evaluada en el máximo verosimil.
 
-&nbsp;&nbsp;&nbsp;&nbsp;Para la creación de los modelos computacionales se usaron los lenguajes R y Python. Python se usó para la limpieza y unificación de los datos, mientras que R se usó para la inferencia estadística. Los módulos necesarios para replicar esta investigación son:
+Para la creación de los modelos computacionales se usaron los lenguajes R y Python. Python se usó para la limpieza y unificación de los datos, mientras que R se usó para la inferencia estadística. Los módulos necesarios para replicar esta investigación son:
 
 Para python: 
 
@@ -323,5 +332,7 @@ cpquery(gbn3_fit,event = ((HEM<=13)|(PCR>=3)|(ALBU<=3)),evidence = (PM_2_5>=160|
 ```{R}
 cpquery(gbn3_fit,event = (ALBU>=3 & ALBU<=5.4),evidence = (NOx<=60|PM_010<=100|SO_2<=75))
 ```
-
+ 
+  - Este evento también tiene una probabilidad bastante alta, de alrededoor de 74% sugiriendo que la mayoría de personas en áreas de poca exposición a estos contaminantes se encuentra saludable
+  
 ## Conclusiones
