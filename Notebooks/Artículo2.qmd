@@ -22,7 +22,7 @@ bibliography: ../Resources/references.bib
 
 ## Metodología
 
-&nbsp;&nbsp;&nbsp;&nbsp;Esta investigación se centró en encontrar las probabilidades de ciertos eventos que podrían ayudar a comprender mejor los efectos de la calidad del aire en la salud de la población. Para ello se utilizaron las redes bayesianas gaussianas (GBNs por sus siglas en inglés). Estas estructuras son grafos dirigidos acíclicos (DAGs por sus siglas en inglés) en los cuales todos los nodos representan variables aleatorias continuas con distribución normal y los arcos, junto con su dirección, representan dependencias condicionales. Las GBNs permiten trabajar con distribuciones condicionales locales en vez de la distribución conjunta (global) $$X \sim N_p(\mu,\Sigma)$$  la cual es más compleja. Las GBNs también nos dan el beneficio de poder realizar queries, una forma de inferencia para encontrar probabilidades del estilo $$\mathbb{P}(Evento|Evidencia)$$ a través de aproximaciones (con algoritmos como logic sampling o muestreo de Monte Carlo) o  de manera exacta (con algoritmos como variable elimination y junction tree) 
+&nbsp;&nbsp;&nbsp;&nbsp;Esta investigación se centró en encontrar las probabilidades de ciertos eventos que podrían ayudar a comprender mejor los efectos de la calidad del aire en la salud de la población. Para ello se utilizaron las redes bayesianas gaussianas (GBNs por sus siglas en inglés). Estas estructuras son grafos dirigidos acíclicos (DAGs por sus siglas en inglés) en los cuales todos los nodos representan variables aleatorias continuas con distribución normal y los arcos, junto con su dirección, representan dependencias condicionales. Las GBNs permiten trabajar con distribuciones condicionales locales en vez de la distribución conjunta (global) $$X \sim N_p(\mu,\Sigma)$$  la cual es más difícil de estimar. Las GBNs también nos dan el beneficio de poder realizar queries, una forma de inferencia para encontrar probabilidades del estilo $$\mathbb{P}(Evento|Evidencia)$$ a través de aproximaciones (con algoritmos como logic sampling o muestreo de Monte Carlo) o  de manera exacta (con algoritmos como variable elimination y junction tree) 
 
 &nbsp;&nbsp;&nbsp;&nbsp;Para la creación de los modelos computacionales se usaron los lenguajes R y Python. Python se usó para la limpieza y unificación de los datos, mientras que R se usó para la inferencia estadística. Los módulos necesarios para replicar esta investigación son:
 
@@ -36,6 +36,9 @@ Para R:
 - ```bnlearn``` para el entrenamiento de las redes bayesianas
 - ```rgraphviz``` para graficar las dags
 - ```tidyverse``` para el manejo de datos
+- ```ggplot``` para graficar funciones lineales
+- ```mgcv``` para los modelos no paramétricos
+- ```gratia``` para los modelos no paramétricos
 
 Adicionalmente los datos usados para esta investigación provienen del Instituto Nacional de Estadística y Geografía (INEGI), con su Encuesta Nacional de Salud y Nutrición (ENSANUT), y la Secretaría del Medio Ambiente y Recursos Naturales (SEMARNAT), con sus sistemas de monitoreo de la calidad del aire
 
@@ -124,17 +127,15 @@ graphviz.plot(dag,shape = 'ellipse')
 ```
 
 Esta estructura fue propuesta basandose en investigación y una entrevista con la otorrinolaringólogo Rocío Yáñez Zambrano. 
-En esta se proopone que todos los contaminantes son independientes entre ellos junto con la transferrina. La transferrina junto con los niveles de óxidos de nitrógeno en el ambiente informan la cantidad de ferritina en la sangre. Las partículas con diámetro menor o igual a 10 micrómetros y 2.5 micrómetros junto con la cantidad de óxidos de nitrógeno y dióxido de azufre denotan el valor de proteína C reactiva en la sangre que informa la concentración de hemoglobina, en conjunto con el monóxido de carbono, y valores de albúmina en la sangre. Finalmente, las partículas con diámetro menor o igual a 10 micrómetros junto con las cantidades de óxidos de nitrógeno y dióxido de azufre condicionan los valores de homocisteína en la sangre.
+En esta se propone que todos los contaminantes son independientes entre ellos junto con la transferrina (TFR). La transferrina junto con los niveles de óxidos de nitrógeno ($NO_x$) en el ambiente informan la cantidad de ferritina (FR) en la sangre. Las partículas con diámetro menor o igual a 10 micrómetros ($PM_{10}$) y 2.5 micrómetros ($PM_{2.5}$) junto con la cantidad de $NO_x$ y dióxido de azufre ($SO_2$) denotan el valor de proteína C reactiva (PCR) en la sangre que informa la concentración de hemoglobina (HEM), en conjunto con el monóxido de carbono ($CO$), y valores de albúmina (ALBU) en la sangre. Finalmente, las $PM_{10}$ junto con las cantidades de $NO_x$ y $SO_2$ condicionan los valores de homocisteína (HCST) en la sangre.
 
-La estructura de la segunda DAG propuesta fue basada en una investigación de la mano del cardiologo intervencionista Diego Guitierrez González, quien con su ayuda se encontraron relaciones entre los contaminates y los diferentes marcadores de inflamación. Es importante recalcar que también se considero que los contaminates son independientes, aunque no son producidos por alguno de los marcadores en la sangre, o de manera general el cuerpo, estos sí son usados o injeridos por el cuerpo, por lo cual afecta a los marcadores de la inflamación.
-Aqui el segundo DAG:
-
+La estructura de la segunda DAG propuesta fue basada en una investigación de la mano del cardiologo intervencionista Diego Guitierrez González, quien con su ayuda se encontraron relaciones entre los contaminates y los diferentes marcadores de inflamación. Es importante recalcar que también se considero que los contaminates son independientes, aunque no son producidos por alguno de los marcadores en la sangre, o de manera general el cuerpo, estos sí son usados o injeridos por el cuerpo, por lo cual afectan a los marcadores de la inflamación.
 ```{R}
 dag2 = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][FR|NOx:SO_2:PM_010:PM_2_5][HEM|SO_2:CO:PM_010:PM_2_5][PCR|NOx:SO_2:PM_010][HCST|PM_010:PM_2_5][TFR|FR][ALBU|HEM:PM_2_5]')
 
 graphviz.plot(dag2,shape = 'ellipse')
 ```
-En el esquema se observa que el PM₂.₅ ejerce un efecto directo sobre la homocisteína (HCST), la hemoglobina (HEM) y la albúmina (ALBU), reflejando su impacto tanto en procesos inflamatorios como en la oxigenación y el transporte de moléculas. A su vez, contaminantes como el CO y el PM₁₀ también influyen en la hemoglobina y en variables respiratorias (FR), mientras que el SO₂ y los NOx muestran una fuerte asociación con la proteína C reactiva (PCR), marcador clave de inflamación sistémica. Finalmente, el diagrama integra cómo estas alteraciones pueden repercutir en funciones secundarias, como la regulación del receptor de transferrina (TFR), vinculando la exposición ambiental con desequilibrios hematológicos y metabólicos. En conjunto, el DAG sintetiza la evidencia epidemiológica y clínica que indica que los contaminantes del aire afectan directamente a biomarcadores centrales en procesos inflamatorios, cardiovasculares y hematológicos.
+En el esquema se observa que el $PM_{2.5}$ ejerce un efecto directo sobre la homocisteína (HCST), la hemoglobina (HEM) y la albúmina (ALBU), reflejando su impacto tanto en procesos inflamatorios como en la oxigenación y el transporte de moléculas. A su vez, contaminantes como el $CO$ y el $PM_{10}$ también influyen en la hemoglobina y en variables respiratorias (FR), mientras que el $SO_2$ y los $NO_x$ muestran una fuerte asociación con la proteína C reactiva (PCR), marcador clave de inflamación sistémica. Finalmente, el diagrama integra cómo estas alteraciones pueden repercutir en funciones secundarias, como la regulación del receptor de transferrina (TFR), vinculando la exposición ambiental con desequilibrios hematológicos y metabólicos. En conjunto, el DAG sintetiza la evidencia epidemiológica y clínica que indica que los contaminantes del aire afectan directamente a biomarcadores centrales en procesos inflamatorios, cardiovasculares y hematológicos.
 
 La estructura de la tercera DAG fue creada en colaboración con la doctora María José Pavía.
 ```{R}
@@ -142,32 +143,19 @@ dag3 = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][PCR|NOx:SO_2:PM_010:PM_2_5
 
 graphviz.plot(dag3,shape = 'ellipse')
 ```
-Esta representa cómo diferentes contaminantes atmosféricos impactan en biomarcadores hematológicos e inflamatorios. En él se observa que NOx, SO₂, PM₁₀ y PM₂.₅ se asocian directamente con la proteína C reactiva (PCR), reflejando su papel como marcadores de inflamación sistémica. El PM₂.₅ y los NOx también influyen en la homocisteína (HCST), vinculada con daño endotelial y riesgo cardiovascular. La frecuencia respiratoria (FR) se ve alterada por la exposición a CO, NOx, SO₂, PM₁₀ y PM₂.₅, lo que condiciona la oxigenación y repercute en la hemoglobina (HEM). Esta última se afecta de forma directa por el CO (formación de carboxihemoglobina), por el aumento de la PCR (anemia inflamatoria), por el PM₂.₅ y por cambios en la función respiratoria. A su vez, la albúmina (ALBU) disminuye en presencia de inflamación (PCR elevada) y por efecto del PM₂.₅, mientras que el receptor de transferrina (TFR) se regula por los niveles de hemoglobina y PCR, integrando el eje de anemia e inflamación. En conjunto, el diagrama sintetiza cómo la exposición a contaminantes se traduce en respuestas inflamatorias y hematológicas interrelacionadas.
+Esta representa cómo diferentes contaminantes atmosféricos impactan en biomarcadores hematológicos e inflamatorios. En él se observa que $NO_x$, $SO_2$ $PM_{10}$ y $PM_{2-5}$ se asocian directamente con la proteína C reactiva (PCR), reflejando su papel como marcadores de inflamación sistémica. El $PM_{2.5}$ y los $NO_x$ también influyen en la homocisteína (HCST), vinculada con daño endotelial y riesgo cardiovascular. La frecuencia respiratoria (FR) se ve alterada por la exposición a $CO$, $NO_x$, $SO_2$ $PM_{10}$ y $PM_{2.5}$, lo que condiciona la oxigenación y repercute en la hemoglobina (HEM). Esta última se afecta de forma directa por el CO (formación de carboxihemoglobina), por el aumento de la PCR (anemia inflamatoria), por el $PM_{2.5}$ y por cambios en la función respiratoria. A su vez, la albúmina (ALBU) disminuye en presencia de inflamación (PCR elevada) y por efecto del $PM_{2.5}$, mientras que el receptor de transferrina (TFR) se regula por los niveles de hemoglobina y PCR, integrando el eje de anemia e inflamación. En conjunto, el diagrama sintetiza cómo la exposición a contaminantes se traduce en respuestas inflamatorias y hematológicas interrelacionadas.
 
 ### Ajustando los modelos lineales
 
-Ajustamos una GBN para los DAGs:
+Después se ajustaron modelos lineales para cada una de las estructuras creadas y se observaron los resultados.
 
-DAG 1:
+#### DAG 1
 
-creemos que los indicadores más importantes que explorar dentro de la primera DAG son: HEM y PCR, ya que estos son principales indicadores de inflamación en el cuerpo y la hemoglobina es la molecula principal que transporta oxigeno y sangre al todas partes del cuerpo.
 ```{R}
 gbn1_fit = bn.fit(dag, data = continuous_data)
 ```
 
-
-Con el primero compararemos los niveles de hemoglobina con las partículas PM_010, porqué? Además de que las partículas PM_010 son nodo padre de la hemoglobina, según los expertos, son el contamiante que más llega a afectar a la hemoglobina. Dicho esto los compararemos:
-
-```{R}
-gbn1_fit$HEM
-```
-
-```{R}
-mod_lm = lm(HEM ~ PM_010, data = continuous_data)
-coef(mod_lm)
-```
-
-
+Para la primera DAG se usó el supuesto que los indicadores de mayor relevancia son la hemoglobina (HEM) y proteína C reactiva (PCR). Esto es debido a su relevancia como marcadores de inflamación y para el transporte de oxígeno a través del cuerpo. El modelo linear que se revisó es el que las compara con las $PM_{10}$ y $PM_{2.5}$ respectivamente ya que son los contaminantes con mayores efectos en el cuerpo.
 ```{R}
 ggplot(data, aes(x = PM_010, y = HEM)) +
   geom_point(color = "steelblue", alpha = 0.3) +
@@ -178,17 +166,8 @@ ggplot(data, aes(x = PM_010, y = HEM)) +
         axis.title.x = element_text(face = "bold"),
         axis.title.y = element_text(face = "bold", angle = 90))
 ```
-Con el PCR, lo compararemos con el PM_2_5, el cual es uno de los contaminantes que más afecta al PCR, según los expertos, y es peor que el PM_010.
 
-```{R}
-gbn1_fit$PCR
-```
-
-```{R}
-mod_lm1 = lm(PCR ~ PM_2_5, data = continuous_data)
-coef(mod_lm1)
-```
-
+Se puede notar que el ajuste lineal deja mucho que desear y que un mejor ajuste podría ser dado por algún modelo no paramétrico.
 
 ```{R}
 ggplot(data, aes(x = PM_2_5, y = PCR)) +
@@ -201,47 +180,27 @@ ggplot(data, aes(x = PM_2_5, y = PCR)) +
         axis.title.y = element_text(face = "bold", angle = 90))
 ```
 
+De la misma forma que en el caso anterior el ajuste líneal no parece ser el correcto, por lo cuál para un mejor ajuste se podrían utilizar modelos no paramétricos
 
+#### DAG 2
 
-DAG 2:
-
-Para el sgundo DAG, estaremos explorando 2 indicadores diferentes que el primer DAG, más no menos importantes, en este caso exploraremos la ferrenina y la albunina. La ferrenina dado NO2 y la albunina dado las partículas PM_2_5, esto porque, según los expertos, son los coantaminates que más llegan a afectar a dichos indicadores sanguineos.
 ```{R}
 gbn2_fit = bn.fit(dag2, data = continuous_data)
 ```
 
-```{R}
-gbn2_fit$FR
-```
-
-```{R}
-mod_lm2 = lm(FR ~ NOx, data = continuous_data)
-coef(mod_lm2)
-```
-
+Para la segunda estructura se exploraron los valoores de ferritina (FR) y albúmina (ALBU). Se analizaron sus modelos lineales con repecto a $NO_2$ y $PM_{2.5}$ respectivamente debido a sus fuertes relaciones teóricas con estos biomarcadores.
 ```{R}
 ggplot(data, aes(x = NOx, y = FR)) +
   geom_point(color = "steelblue", alpha = 0.3) +
   geom_smooth(method = lm, se = FALSE, lwd = 2, color = "dodgerblue") +
-  labs(x = "Dióxido de nitrógeno", y = "Ferrenina", title = "") +
+  labs(x = "Dióxido de nitrógeno", y = "Ferritina", title = "") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", margin = margin(0, 0, 5, 0)),
         axis.title.x = element_text(face = "bold"),
         axis.title.y = element_text(face = "bold", angle = 90))
 ```
 
-
-
-```{R}
-gbn2_fit$ALBU
-```
-
-
-```{R}
-mod_lm3 = lm(ALBU ~ PM_2_5, data = continuous_data)
-coef(mod_lm3)
-```
-
+De la misma forma que con el modelo anterior el modelo lineal parece no dar el mejor ajuste puesto que hay muchos valores que caen separados de la línea y hay demasiados valores concetrados cerca del orígen. Para resolver esto podría utilizarse un modelo no paramétrico
 ```{R}
 ggplot(data, aes(x = PM_2_5, y = ALBU)) +
   geom_point(color = "steelblue", alpha = 0.3) +
@@ -253,22 +212,15 @@ ggplot(data, aes(x = PM_2_5, y = ALBU)) +
         axis.title.y = element_text(face = "bold", angle = 90))
 ```
 
+Este modelo de la misma forma que los anteriores no presentó un buen ajuste. De la misma forma que con los anteriores se podría considerar un modelo no paramétrico para un mejor ajuste.
 
-DAG 3:
-Con el tercer DAG solo exploraremos un indicador: la transferrina. Esto porque esta afectada por la mayoría de contaminantes dado sus padres, lo cuales son indicadores tambíen.
+#### DAG 3
+
 ```{R}
 gbn3_fit = bn.fit(dag3, data = continuous_data)
 ```
 
-```{R}
-gbn3_fit$TFR
-```
-
-```{R}
-mod_lm4 = lm(TFR ~ PCR, data = continuous_data)
-coef(mod_lm4)
-```
-
+Para el tercer modelo solo se revisó un indicador, la transferrina. Este se revisó en términos de otro biomarcador, la proteína C reactiva, esto para tener una mejor idea de cóommo es su relación al hablar de inflamación. 
 ```{R}
 ggplot(data, aes(x = PCR, y = TFR)) +
   geom_point(color = "steelblue", alpha = 0.3) +
@@ -279,10 +231,11 @@ ggplot(data, aes(x = PCR, y = TFR)) +
         axis.title.x = element_text(face = "bold"),
         axis.title.y = element_text(face = "bold", angle = 90))
 ```
+De la misma forma que coon los otros modelos  el ajuste líneal no parece apropiado para estas variables debido a la alta concentración de puntos cerca del orígen.
 
-La función de estas comparaciones en todas las DAGs es para explorar si un modelo lineal (GBN) tiene sentido para los datos; como podemos observar, en dichas comparaciones no tuvo tanto sentido hacer un modelo lineal, ya que no explica muy bien los datos y no abarca la mayoría de datos, muchas de estas variables cuentan con outlayers, los cuales se ven excluidos en el modelo. Para corregir esto, un modelo no parámetrico puede ser una buena opción.
+Después de ralizar todos estos análisis se decidio que una GBN linear (LGBN) no tiene sentido para los datos; como podemos observar, en dichas comparaciones el modelo lineal no tuvo un uen ajuste, no explica muy bien los datos y no explica la mayoría de la variabbilidad. Esto pede ser causado debido a que muchas de estas variables cuentan con outliers, que sesgan el modelo. Para coonseguir un mejor ajuste se podría considerar un modelo no paramétrico. 
 
-# Comparando las DAGS
+### Comparando las DAGS
 
 Con las DAGs ya creadas se encontró la necesidad de comparar los modelos para ver cuál representa mejor las relaciones que existen en estos datos y constestar las preguntas de investigación. Para esto se ultilizaron las pruebas de Bayesian Information Criterion y Akaike Information Criterion.
 
@@ -308,51 +261,44 @@ Tomando esta información en cuenta se decidió que la estructura a utilizar par
 
 ### Mejor GBN incluyendo el sexo
 
-### Queries
-
-Finalmente después de incluír el sexo se procedió a responder las preguntas de investigación propuestas por los médicos consultados, estas fueron las siguientes:
-
-1. Propuesta por el cardiólogo Diego Gutierrez González: ¿Cúal es la probablidad de tener un nivel irregular de ferritina en la sangre de un hombre dado que está en un estado en el que se liberaron al menos ?
+Tras comparar las DAGs se coonsideró construír un cuarto modelo en el que se incluye el sexo. 
 ```{R}
-cpquery(gbn3_fit,event = (FR<=200 & FR>=15),evidence = (NOx>=250))
-```
-
-2. Propuesta por la otrrinolaringólogo Rocío Yáñez Zambrano: ¿Cuál es la probabilidad de que la concentración de hemoglobina o albúmina estén abajo de los rangos normales, o la proteína C reactiva esté arriba de los valores normales dado que la persona se encuentre en un área con emisiones de $PM_{10}$, $PM_{2.5}$ y $SO_2$ elevadas?
-```{R}
-score(dag3, data = continuous_data, "bic-g")
-```
-
-### Mejor GBN con sexo
-
-```{r}
 data_sex$S <- factor(data_sex$S, levels = c(1,2))
 
-```
-
-```{R}
 dag_sex = model2network('[S][NOx][CO][SO_2][PM_010][PM_2_5][PCR|NOx:SO_2:PM_010:PM_2_5][HCST|PM_2_5:NOx:S][FR|CO:NOx:SO_2:PM_010:PM_2_5:S][HEM|CO:PCR:PM_2_5:FR:S][ALBU|PCR:PM_2_5][TFR|HEM:PCR]')
 
 graphviz.plot(dag_sex,shape = 'ellipse')
 ```
 
+Esta estructura cumple con las mismas relaciones que la tercera, añadiendo que la concentración de hemogloina (HEM) la cantidad de ferritina (FR) y los valores de homocisteína (HCST) se ven afectados por el seco de la persona. Después se otuvieron los puntajes de esta DAG en las mismas prueas que las anteriores.
+
 ```{r}
-score(dag_sex, data = data_sex, "bic-cg")
-score(dag_sex, data = data_sex, "aic-cg")
+bic_4 = score(dag_sex, data = data_sex, "bic-cg")
+aic_4 = score(dag_sex, data = data_sex, "aic-cg")
+
+data.frame(BIC = bic_4, AIC = aic_4)
 ```
 
+El desempeño de esta DAG fue peor que el desempeño de la versióon que obvia el sexo. Es debido a esto que la DAG que se usará para las preguntas de investigación (*queries*) será la propuesta por la doctora María José Pavía.
 
 ### Queries
 
 Finalmente después de incluír el sexo se procedió a responder las preguntas de investigación propuestas por los médicos consultados, estas fueron las siguientes:
 
-1. Propuesta por el cardiólogo Diego Gutierrez González: ¿Cúal es la probablidad de tener un nivel irregular de ferritina en la sangre de un hombre dado que está en un estado en el que se liberaron al menos ?
+1. Propuesta por el cardiólogo Diego Gutierrez González: ¿Cúal es la probablidad de que una persona tenga un nivel irregular de ferritina dado que está en una localidad en el que se liberaron al menos 250 toneladas de $NO_x$ al año?
 ```{R}
 cpquery(gbn3_fit,event = (FR<=200 & FR>=15),evidence = (NOx>=250))
 ```
 
+  - El resultado de este query sugiere que se trata de una ocurrencia relativamente común con 71% de probabilidad de ocurrir.
+  
 2. Propuesta por la otrrinolaringólogo Rocío Yáñez Zambrano: ¿Cuál es la probabilidad de que la concentración de hemoglobina o albúmina estén abajo de los rangos normales, o la proteína C reactiva esté arriba de los valores normales dado que la persona se encuentre en un área con emisiones de $PM_{10}$, $PM_{2.5}$ y $SO_2$ elevadas?
 ```{R}
 cpquery(gbn3_fit,event = ((HEM<=13)|(PCR>=3)|(ALBU<=3)),evidence = (PM_2_5>=160|PM_010>=320|SO_2>=200))
 ```
+  
+  - El resultado de este query sugiere que más de la mitad de las personas que sean expuestas a emisiones altas de algún contaminante presentaran inflamación de alguna forma.
+  
+3. Propuesta por la doctora María José Pavía: 
 
 ## Conclusiones
