@@ -29,7 +29,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 ## Abstract
 
-La contaminación atmosférica es un determinante clave de la salud pública, con impactos diferenciales sobre procesos inflamatorios, respiratorios y cardiovasculares. Este estudio integra microdatos biomédicos de la Encuesta Nacional de Salud y Nutrición (ENSANUT) y registros de calidad del aire de la SEMARNAT para explorar la relación entre emisiones de contaminantes ($NO_x$, $CO$, $SO_2$, $PM_{10}$ y $PM_{2.5}$) y biomarcadores séricos (Proteína C reactiva, ferritina, homocisteína, transferrina, hemoglobina y albúmina) en población mexicana. Tras una etapa de limpieza y unificación en Python, se entrenaron Redes Bayesianas Gaussianas (GBN) en R para proponer y comparar tres estructuras causales (DAGs) informadas por literatura y entrevistas clínicas. La comparación mediante *Bayesian Information Criterion* (BIC) y *Akaike Information Criterion* (AIC) favoreció marginalmente la tercera estructura; los modelos lineales simples mostraron bajo ajuste, sugiriendo la conveniencia de enfoques no paramétricos. Consultas probabilísticas (*queries*) indicaron, alta probabilidad de niveles fuera de rango de ferritina bajo emisiones elevadas de $NO_x$ y mayor probabilidad de inflamación (PCR elevada o descenso de HEM/ALBU) bajo cargas altas de $PM_{2.5}$, $PM_{10}$ y $SO_2$. Los resultados apoyan el uso de GBN para inferencia probabilística y priorización de riesgos, y orientan futuras extensiones con modelos no paramétricos y estratificación demográfica.
+La contaminación atmosférica es un determinante clave de la salud pública, con impactos diferenciales sobre procesos inflamatorios, respiratorios y cardiovasculares. Este estudio integra microdatos biomédicos de la Encuesta Nacional de Salud y Nutrición (ENSANUT) y registros de calidad del aire de la SEMARNAT para explorar la relación entre emisiones de contaminantes ($NO_x$, $CO$, $SO_2$, $PM_{10}$ y $PM_{2.5}$) y biomarcadores séricos (Proteína C reactiva, ferritina, homocisteína, transferrina, hemoglobina y albúmina) en la población mexicana. Tras una etapa de limpieza y unificación en Python, se entrenaron Redes Bayesianas Gaussianas (GBN) en R para proponer y comparar tres estructuras causales (DAGs) informadas por literatura y entrevistas clínicas. La comparación mediante *Bayesian Information Criterion* (BIC) y *Akaike Information Criterion* (AIC) favoreció marginalmente la tercera estructura; los modelos lineales simples mostraron bajo ajuste, sugiriendo la conveniencia de enfoques no paramétricos. Consultas probabilísticas (*queries*) indicaron, alta probabilidad de niveles fuera de rango de ferritina bajo emisiones elevadas de $NO_x$ y mayor probabilidad de inflamación (PCR elevada o descenso de HEM/ALBU) bajo cargas altas de $PM_{2.5}$, $PM_{10}$ y $SO_2$. Los resultados apoyan el uso de GBN para inferencia probabilística y priorización de riesgos, y orientan futuras extensiones con modelos no paramétricos y estratificación demográfica.
 
 Palabras clave: calidad del aire, biomarcadores, redes bayesianas gaussianas, ENSANUT, SEMARNAT, BIC, AIC.
 
@@ -45,7 +45,7 @@ Los resultados muestran que: (1) los modelos lineales simples entre pares (conta
 
 ## Metodología
 
-Esta investigación se centró en encontrar las probabilidades de ciertos eventos que podrían ayudar a comprender mejor los efectos de la calidad del aire en la salud de la población. Para ello se utilizaron las redes bayesianas gaussianas (GBNs por sus siglas en inglés). Estas estructuras son grafos dirigidos acíclicos (DAGs por sus siglas en inglés) en los cuales todos los nodos representan variables aleatorias continuas con distribución normal y los arcos, junto con su dirección, representan dependencias condicionales. Las GBNs permiten trabajar con distribuciones condicionales locales en vez de la distribución conjunta (global) $$X \sim N_p(\mu,\Sigma)$$  la cual es más difícil de estimar. Las GBNs también nos dan el beneficio de poder realizar queries, una forma de inferencia para encontrar probabilidades del estilo $$\mathbb{P}(Evento|Evidencia)$$ a través de aproximaciones (con algoritmos como logic sampling o muestreo de Monte Carlo) o  de manera exacta (con algoritmos como variable elimination y junction tree). Aunado a esto se utilizaron el *Akaike Information Criterion* (AIC), dado por $$AIC = 2k - 2\ell(\hat{\theta};x)$$ y *Bayesian Information Criterion* dado por $$BIC = k\log(n)-2\ell(\hat{\theta};x)$$ para puntuar y comparar los modelos. En estos $k$ es la cantidad de parámetros del modelo, $n$ es el tamaño de la muestra y $\ell(\hat{\theta};x)$ es la log-verosimilitud evaluada en el máximo verosimil.
+Esta investigación se centró en encontrar las probabilidades de ciertos eventos que podrían ayudar a comprender mejor los efectos de la calidad del aire en la salud de la población. Para ello se utilizaron las redes bayesianas gaussianas (GBNs por sus siglas en inglés). Estas estructuras son grafos dirigidos acíclicos (DAGs por sus siglas en inglés) en los cuales todos los nodos representan variables aleatorias continuas con distribución normal y los arcos, junto con su dirección, describen dependencias condicionales. Las GBNs permiten trabajar con distribuciones condicionales locales en vez de la distribución conjunta (global) $$X \sim N_p(\mu,\Sigma)$$ la cual es más difícil de estimar. Las GBNs también nos dan el beneficio de poder realizar queries, una forma de inferencia para encontrar probabilidades del estilo $$\mathbb{P}(Evento|Evidencia)$$ a través de aproximaciones (con algoritmos como logic sampling o muestreo de Monte Carlo) o  de manera exacta (con algoritmos como variable elimination y junction tree). Aunado a esto se utilizaron el *Akaike Information Criterion* (AIC), dado por $$AIC = 2k - 2\ell(\hat{\theta};x)$$ y *Bayesian Information Criterion* dado por $$BIC = k\log(n)-2\ell(\hat{\theta};x)$$ para puntuar y comparar los modelos. En estos $k$ es la cantidad de parámetros del modelo, $n$ es el tamaño de la muestra y $\ell(\hat{\theta};x)$ es la log-verosimilitud evaluada en el máximo verosimil.
 
 Para la creación de los modelos computacionales se usaron los lenguajes R y Python. Python se usó para la limpieza y unificación de los datos, mientras que R se usó para la inferencia estadística. Los módulos necesarios para replicar esta investigación son:
 
@@ -67,7 +67,7 @@ Adicionalmente los datos usados para esta investigación provienen del Instituto
 
 ## Aplicación
 
-Para comenzar la investigación se tomaron los archivos de la ENSANUT realizada por el INEGI y se unieron con el archivo de calidad del aire de la SEMARNAT. Se entrevistaron a varios médicos y se consultaron diversos estudios para determinar qué variables podrían resultar afectadas por cambios en la calidad del aire, y se encontró que el mayor efecto de la calidad del aire en la salud de las personas se puede notar en los sistemas respiratorio y cardiovascular. [@WHO2021AQG] Aunado a esto también se denota que los efectos de estas partículas y gases nocivos fueron más notorios en las poblaciones de hombres entre las edades de 75 a 79 y más de 80, y más fuertes a través de líneas de desarrollo socioeconómico [@10.3389/fmed.2024.1472996]. Los médicos también informan que las aflicciones más comúnmente ligadas a declive en la calidad del aire son cardiopatía isquémica, enfermedad pulmonar obstructiva crónica (EPOC), asma, derrames cerebrales e incluso cáncer [@WHO2021AQG]. Tomando esto en cuenta de la base de datos de pruebas médicas, se decidió conservar únicamente las variables que la literatura sugiere tienen una correlación con estas enfermedades, que en términos de esta base de datos se trató de la proteína C reactiva, ferritina, homocisteína, transferrina, concentración de hemoglobina y albúmina, que son marcadores de inflamación. Sumado a esto se decidió conservar únicamente las fuentes de área para los valores de los contaminantes en el aire, debido a que estas no tienen valores nulos y casi todos los municipios tienen este tipo de medición. Finalmente en cuanto a valores demográficos se conservaron únicamente el sexo en vista de que la literatura sugiere que son factores relevantes.
+Para comenzar la investigación se tomaron los archivos de la ENSANUT realizada por el INEGI y se unieron con el archivo de calidad del aire de la SEMARNAT. Se entrevistaron a varios médicos y se consultaron diversos estudios para determinar qué variables podrían resultar afectadas por cambios en la calidad del aire, y se encontró que el mayor efecto de la calidad del aire en la salud de las personas se puede notar en los sistemas respiratorio y cardiovascular. [@WHO2021AQG] Aunado a esto también se denota que los efectos de estas partículas y gases nocivos fueron más notorios en las poblaciones de hombres entre las edades de 75 a 79 y más de 80, y más fuertes a través de líneas de desarrollo socioeconómico [@10.3389/fmed.2024.1472996]. Los médicos también informan que las aflicciones más comúnmente ligadas al declive en la calidad del aire son cardiopatía isquémica, enfermedad pulmonar obstructiva crónica (EPOC), asma, derrames cerebrales e incluso cáncer [@WHO2021AQG]. Tomando esto en cuenta, de la base de datos de pruebas médicas, se decidió conservar únicamente las variables que la literatura sugiere tienen una correlación con estas enfermedades, que en términos de esta base de datos se trató de la proteína C reactiva, ferritina, homocisteína, transferrina, concentración de hemoglobina, y albúmina, que son marcadores de inflamación. Sumado a esto se decidió conservar solamente las fuentes de área para los valores de los contaminantes en el aire, debido a que estas no tienen valores nulos y casi todos los municipios tienen este tipo de medición. Finalmente, en cuanto a valores demográficos se conservaron únicamente el sexo, en vista de que la literatura sugiere que son factores relevantes.
 ```{python}
 #importando librerías
 import pandas as pd #usamos pandas para el manejo de los datos
@@ -158,7 +158,7 @@ Esta estructura fue propuesta basándose en la investigación y en una entrevist
 
 En esta se propone que todos los contaminantes son independientes entre ellos junto con la transferrina (TFR). La transferrina en conjunto con los niveles de óxidos de nitrógeno ($NO_x$) en el ambiente informan la cantidad de ferritina (FR) en la sangre. Las partículas con diámetro menor o igual a 10 micrómetros ($PM_{10}$) y 2.5 micrómetros ($PM_{2.5}$) junto con la cantidad de $NO_x$ y dióxido de azufre ($SO_2$) denotan el valor de proteína C reactiva (PCR) en la sangre que representa la concentración de hemoglobina (HEM), en conjunto con el monóxido de carbono ($CO$), y valores de albúmina (ALBU) en la sangre. Finalmente, las $PM_{10}$ junto con las cantidades de $NO_x$ y $SO_2$ condicionan los valores de homocisteína (HCST) en la sangre. [@Rajagopalan2018]
 
-La estructura de la segunda DAG propuesta fue basada en una investigación de la mano del cardiologo intervencionista Diego Guitierrez González, quien con su ayuda se encontraron relaciones entre los contaminates y los diferentes marcadores de inflamación. Es importante recalcar que también se consideró que los contaminates son independientes, aunque no son producidos por alguno de los marcadores en la sangre, o de manera general en el cuerpo, estos sí son usados o ingeridos por el cuerpo, por lo cual afectan a los marcadores de la inflamación.
+La estructura de la segunda DAG propuesta fue basada en una investigación de la mano del cardiologo intervencionista Diego Guitierrez González, quien con su ayuda se encontraron relaciones entre los contaminantes y los diferentes marcadores de inflamación. Es importante recalcar que también se consideró que los contaminates son independientes, aunque no son producidos por alguno de los marcadores en la sangre, o de manera general en el cuerpo, estos sí son usados o ingeridos por el cuerpo, por lo cual afectan a los marcadores de la inflamación.
 ```{R}
 dag2 = model2network('[NOx][CO][SO_2][PM_010][PM_2_5][FR|NOx:SO_2:PM_010:PM_2_5][HEM|SO_2:CO:PM_010:PM_2_5][PCR|NOx:SO_2:PM_010][HCST|PM_010:PM_2_5][TFR|FR][ALBU|HEM:PM_2_5]')
 
@@ -209,7 +209,7 @@ ggplot(data, aes(x = PM_2_5, y = PCR)) +
         axis.title.y = element_text(face = "bold", angle = 90))
 ```
 
-De la misma forma que en el caso anterior el ajuste líneal no parece ser el correcto, por lo cuál para un mejor ajuste se podrían utilizar modelos no paramétricos
+De la misma forma que en el caso anterior, el ajuste líneal no parece ser el correcto, por lo cual para un mejor ajuste se podrían utilizar modelos no paramétricos.
 
 #### DAG 2
 
@@ -217,7 +217,7 @@ De la misma forma que en el caso anterior el ajuste líneal no parece ser el cor
 gbn2_fit = bn.fit(dag2, data = continuous_data)
 ```
 
-Para la segunda estructura se exploraron los valoores de ferritina (FR) y albúmina (ALBU). Se analizaron sus modelos lineales con repecto a $NO_2$ y $PM_{2.5}$ respectivamente debido a sus fuertes relaciones teóricas con estos biomarcadores.
+Para la segunda estructura se exploraron los valores de ferritina (FR) y albúmina (ALBU). Se analizaron sus modelos lineales con repecto a $NO_2$ y $PM_{2.5}$ respectivamente debido a sus fuertes relaciones teóricas con estos biomarcadores.
 ```{R}
 ggplot(data, aes(x = NOx, y = FR)) +
   geom_point(color = "steelblue", alpha = 0.3) +
@@ -229,7 +229,7 @@ ggplot(data, aes(x = NOx, y = FR)) +
         axis.title.y = element_text(face = "bold", angle = 90))
 ```
 
-De la misma forma que con el modelo anterior el modelo lineal parece no dar el mejor ajuste puesto que hay muchos valores que caen separados de la línea y hay demasiados valores concetrados cerca del orígen. Para resolver esto podría utilizarse un modelo no paramétrico
+De la misma forma que con el modelo previo, el modelo lineal parece no dar el mejor ajuste puesto que hay muchos valores que caen separados de la línea y hay demasiados valores concentrados cerca del origen. Nuevamente se sugiere el uso de un modelo no paramétrico.
 ```{R}
 ggplot(data, aes(x = PM_2_5, y = ALBU)) +
   geom_point(color = "steelblue", alpha = 0.3) +
@@ -241,7 +241,7 @@ ggplot(data, aes(x = PM_2_5, y = ALBU)) +
         axis.title.y = element_text(face = "bold", angle = 90))
 ```
 
-Este modelo de la misma forma que los anteriores no presentó un buen ajuste. De la misma forma que con los anteriores se podría considerar un modelo no paramétrico para un mejor ajuste.
+Este modelo de la misma forma que los anteriores no presentó un buen ajuste, por lo tanto, igualmente se recomienda emplear un modelo no paramétrico.
 
 #### DAG 3
 
@@ -249,7 +249,7 @@ Este modelo de la misma forma que los anteriores no presentó un buen ajuste. De
 gbn3_fit = bn.fit(dag3, data = continuous_data)
 ```
 
-Para el tercer modelo solo se revisó un indicador, la transferrina. Este se revisó en términos de otro biomarcador, la proteína C reactiva, esto para tener una mejor idea de cóommo es su relación al hablar de inflamación. 
+Para el tercer modelo solo se revisó un indicador, la transferrina. Este se examinó en términos de otro biomarcador, la proteína C reactiva, esto para tener una mejor idea de cómo es su relación al hablar de inflamación. 
 ```{R}
 ggplot(data, aes(x = PCR, y = TFR)) +
   geom_point(color = "steelblue", alpha = 0.3) +
@@ -260,13 +260,13 @@ ggplot(data, aes(x = PCR, y = TFR)) +
         axis.title.x = element_text(face = "bold"),
         axis.title.y = element_text(face = "bold", angle = 90))
 ```
-De la misma forma que coon los otros modelos  el ajuste líneal no parece apropiado para estas variables debido a la alta concentración de puntos cerca del orígen.
+De la misma forma que con los otros modelos, el ajuste líneal no parece apropiado para estas variables debido a la alta concentración de puntos cerca del origen.
 
-Después de ralizar todos estos análisis se decidio que una GBN linear (LGBN) no tiene sentido para los datos; como podemos observar, en dichas comparaciones el modelo lineal no tuvo un uen ajuste, no explica muy bien los datos y no explica la mayoría de la variabbilidad. Esto pede ser causado debido a que muchas de estas variables cuentan con outliers, que sesgan el modelo. Para coonseguir un mejor ajuste se podría considerar un modelo no paramétrico. 
+Después de realizar todos estos análisis se decidio que una GBN linear (LGBN) no tiene sentido para los datos; como podemos observar, en dichas comparaciones el modelo lineal no tuvo un buen ajuste, no explica correctamente los datos ni la mayoría de la variabbilidad. Esto puede ser causado debido a que muchas de estas variables cuentan con outliers, que sesgan el modelo. Para conseguir un mejor ajuste se podría considerar un modelo no paramétrico. 
 
 ### Comparando las DAGS
 
-Con las DAGs ya creadas se encontró la necesidad de comparar los modelos para ver cuál representa mejor las relaciones que existen en estos datos y constestar las preguntas de investigación. Para esto se ultilizaron las pruebas de Bayesian Information Criterion (BIC) y Akaike Information Criterion (AIC).
+Con las DAGs ya creadas se encontró la necesidad de comparar los modelos para ver cuál representa mejor las relaciones que existen en estos datos y contestar las preguntas de investigación. Por tal motivo se utilizaron las pruebas de Bayesian Information Criterion (BIC) y Akaike Information Criterion (AIC).
 
 ```{R}
 bic_1 = score(dag, data = continuous_data, type = "bic-g")
@@ -284,13 +284,13 @@ aic_3 = score(dag3,data = continuous_data, type = 'aic-g')
 
 data.frame(DAG1 = aic_1, DAG2 = aic_2, DAG3 = aic_3)
 ```
-De la misma forma usando el AIC se notó que el mejor puntaje era aquel de la tercera DAG pero solo de manera marginal
+De la misma forma usando el AIC se observó que el mejor puntaje era aquel de la tercera DAG pero solo de manera marginal.
 
 Tomando esta información en cuenta se decidió que la estructura a utilizar para las preguntas de investigación sería alguna versión de la tercera DAG.
 
 ### Mejor GBN incluyendo el sexo
 
-Tras comparar las DAGs se consideró construír un cuarto modelo en el que se incluye el sexo. 
+Tras comparar las DAGs se consideró construir un cuarto modelo en el que se incluye el sexo. 
 ```{R}
 data_sex$S <- factor(data_sex$S, levels = c(1,2))
 
@@ -299,7 +299,7 @@ dag_sex = model2network('[S][NOx][CO][SO_2][PM_010][PM_2_5][PCR|NOx:SO_2:PM_010:
 graphviz.plot(dag_sex,shape = 'ellipse')
 ```
 
-Esta estructura cumple con las mismas relaciones que la tercera, añadiendo que la concentración de hemogloina (HEM) la cantidad de ferritina (FR) y los valores de homocisteína (HCST) se ven afectados por el seco de la persona. Después se otuvieron los puntajes de esta DAG en las mismas prueas que las anteriores.
+Esta estructura cumple con las mismas relaciones que la tercera, añadiendo que la concentración de hemogloina (HEM), la cantidad de ferritina (FR) y los valores de homocisteína (HCST) se ven afectados por el sexo de la persona. Después se obtuvieron los puntajes de esta DAG en las mismas prbeas que las anteriores.
 
 ```{r}
 bic_4 = score(dag_sex, data = data_sex, "bic-cg")
@@ -308,7 +308,7 @@ aic_4 = score(dag_sex, data = data_sex, "aic-cg")
 data.frame(BIC = bic_4, AIC = aic_4)
 ```
 
-El desempeño de esta DAG fue peor que el desempeño de la versióon que obvia el sexo. Es debido a esto que la DAG que se usará para las preguntas de investigación (*queries*) será la propuesta por la doctora María José Pavía.
+El desempeño de esta DAG fue peor que la versión que elude la variable del sexo. Es debido a esto que la DAG que se usará para las preguntas de investigación (*queries*) será la propuesta por la doctora María José Pavía.
 
 ### Queries
 
@@ -319,22 +319,24 @@ Finalmente después de incluir el sexo se procedió a responder las preguntas de
 cpquery(gbn3_fit,event = (FR<=200 & FR>=15),evidence = (NOx>=250))
 ```
 
-  - El resultado de este query sugiere que se trata de una ocurrencia relativamente común con 72% de probabilidad de ocurrir.
+  - El resultado de este query sugiere que se trata de una ocurrencia relativamente común con un 72% de probabilidad.
   
 2. Propuesta por la otrrinolaringólogo Rocío Yáñez Zambrano: ¿Cuál es la probabilidad de que la concentración de hemoglobina o albúmina estén abajo de los rangos normales, o la proteína C reactiva esté arriba de los valores normales dado que la persona se encuentre en un área con emisiones de $PM_{10}$, $PM_{2.5}$ y $SO_2$ elevadas?
 ```{R}
 cpquery(gbn3_fit,event = ((HEM<=13)|(PCR>=3)|(ALBU<=3)),evidence = (PM_2_5>=160|PM_010>=320|SO_2>=200))
 ```
   
-  - El resultado de este query sugiere que más de la mitad de las personas que sean expuestas a emisiones altas de algún contaminante presentaran inflamación de alguna forma.
+  - El resultado de este query sugiere que más de la mitad de las personas que sean expuestas a emisiones altas de algún contaminante presentaran cierto tipo de inflamación.
   
-3. Propuesta por la doctora María José Pavía: ¿Cual es la probabilidad de que la albúmina en la sangre de una presona se encuentre en un rango normal dado que los niveles de $NOx$, $PM_{10}$ y $SO_2$ son bajos?
+3. Propuesta por la doctora María José Pavía: ¿Cual es la probabilidad de que la albúmina en la sangre de una persona se encuentre en un rango normal dado que los niveles de $NOx$, $PM_{10}$ y $SO_2$ son bajos?
 ```{R}
 cpquery(gbn3_fit,event = (ALBU>=3 & ALBU<=5.4),evidence = (NOx<=60|PM_010<=100|SO_2<=75))
 ```
  
-  - Este evento también tiene una probabilidad bastante alta, de alrededoor de 74% sugiriendo que la mayoría de personas en áreas de poca exposición a estos contaminantes se encuentra saludable
+  - Este evento también tiene una probabilidad bastante alta, de alrededor del 74%, sugiriendo que la mayoría de personas en áreas de poca exposición a estos contaminantes se encuentra saludable.
   
 ## Conclusiones
 
+La sección de resultados contiene dos partes, la primera involucra el trasfondo e investigación para la subsecuente creación y comparación de las DAGs, y como segunda parte se tiene la generación y respuesta a las queries formuladas optando por utilizar la mejor DAG de acuerdo al criterio del equipo. 
+El el primer segmento se realizó una investigación sobre los principales contaminantes del aire (PM2.5, PM10, NOx, SO₂, O₃, CO, COV y NH₃) así como una posible relación con bioindicadores (colesterol total, HDL, LDL, triglicéridos, hemoglobina, proteína C reactiva (PCR), ferritina, vitamina D y vitamina B12), y se descubrió que la forma en la que los efectos de la contaminación ambiental relucen en la salud humana son a través de varios de estos marcadores, especialmente como inflamación, problemas cardiovasculares y hematológicos. Asimismo se recurrió al apoyo de tres expertos médicos para la realización de las DAGs, cada uno aportando una estructura, posteriormente se ajustaron modelos lineales para cada una de ellas, sin embargo, los resultados dejaron bastante que desear, ya que en el análisis se observa una GNB linear (LGNB) no hace sentido debido a que no se obtuvo un buen ajuste, la explicación con respecto a los datos es vaga, y la descripción de la variabilidad es casi nula. Una probable causa podría ser la aparición notoria de outliers en la mayoría de las variables, por lo que una posible solución a esto sería considerar un modelo no paramétrico. Una vez finalizado este análisis se compararon las estructuras creadas utilizando como parámetro los resultados obtenidos en las pruebas BIC y AIC. En ambos casos la tercera DAG propuesta por la Dra. María José Pavía resultó con un mejor ajuste respecto a las otras dos. Aunado a esto se generó una cuarta DAG que incluyera el sexo, lamentablemente, sus puntajes obtenidos en las pruebas fueron peores, por lo tanto, el tercer grafo fue el seleccionado para responder las queries. Las conclusiones son las siguientes: existe un 72% que si una persona se encuentra en una localidad donde se liberaron 250 toneladas o más de óxidos de nitrógeno padezca niveles irregulares de ferritina, lo que podría ocasionar falta de hierro, enfermedades hepáticas o incluso ciertos tipos de cáncer. Otro resultado que se obtuvo fue que más de 1 de cada 2 personas que hayan estado expuestas a emisiones superiores de micropartículas y dióxido de azufre presentarán algún indicio de inflamación, y como era de esperar, aproximadamente 3 de cada 4 personas poseen un rango aceptable de albúmina en su sangre si se encuentra en un área con poca exposición a estos mismos contaminantes, lo cual sugiere que niveles altos de estos componentes ocasionan un deterioro en la salud y niveles bajos o dentro de un intervalo aceptable no generarán malestar inflamatorio. Por último, se sugiere la creación y consideración de modelos no paramétricos para obtener mejores resultados, del mismo modo, las bases de datos exploradas contienen varias deficiencias que obstaculizaron e impidieron un mejor análisis e interpretación de los datos.
 
