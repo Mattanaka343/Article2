@@ -15,6 +15,11 @@ format:
 editor: source
 bibliography: ../Resources/references.bib
 ---
+```{R}
+#| include: false
+knitr::opts_chunk$set(echo = FALSE)
+
+```
 ## Abstract
 La contaminación atmosférica es un determinante clave de la salud pública, con impactos diferenciales sobre procesos inflamatorios, respiratorios y cardiovasculares. Este estudio integra microdatos biomédicos de la Encuesta Nacional de Salud y Nutrición (ENSANUT) y registros de calidad del aire de la SEMARNAT para explorar la relación entre emisiones de contaminantes (NOx, CO, SO₂, PM₁₀ y PM₂.₅) y biomarcadores séricos (PCR, ferritina, homocisteína, transferrina, hemoglobina y albúmina) en población mexicana. Tras una etapa de limpieza y unificación en Python, se entrenaron Redes Bayesianas Gaussianas (GBN) en R para proponer y comparar tres estructuras causales (DAGs) informadas por literatura y entrevistas clínicas. La comparación mediante BIC y AIC favoreció marginalmente la tercera estructura; los modelos lineales simples mostraron bajo ajuste, sugiriendo la conveniencia de enfoques no paramétricos. Consultas probabilísticas (cpquery) indicaron, por ejemplo, alta probabilidad de niveles dentro de rango de ferritina bajo emisiones elevadas de NOx y mayor probabilidad de inflamación (PCR elevada o descenso de HEM/ALBU) bajo cargas altas de PM y SO₂. Los resultados apoyan el uso de GBN para inferencia probabilística y priorización de riesgos, y orientan futuras extensiones con modelos no paramétricos y estratificación demográfica.
 
@@ -120,11 +125,16 @@ data.to_csv('../Data/data.csv', index=False)
 
 Primero se intentó tratar este problema únicamente en términos de sus variables continuas, estas son los valores de los marcadores de inflamación en la sangre, junto con los valores de los contaminantes, después se construyó la siguiente estructura para intentar describir sus relaciones.
 ```{R}
+#| warning: false
+#| message: false
+
 library(bnlearn)
 library(tidyverse)
 library(ggplot2)
 library(mgcv)
 library(gratia)
+
+set.seed(42)
 
 data = read_csv("../Data/data.csv")
 continuous_data = data |> select(-S, -E)
@@ -300,7 +310,7 @@ Finalmente después de incluir el sexo se procedió a responder las preguntas de
 cpquery(gbn3_fit,event = (FR<=200 & FR>=15),evidence = (NOx>=250))
 ```
 
-  - El resultado de este query sugiere que se trata de una ocurrencia relativamente común con 71% de probabilidad de ocurrir.
+  - El resultado de este query sugiere que se trata de una ocurrencia relativamente común con 72% de probabilidad de ocurrir.
   
 2. Propuesta por la otrrinolaringólogo Rocío Yáñez Zambrano: ¿Cuál es la probabilidad de que la concentración de hemoglobina o albúmina estén abajo de los rangos normales, o la proteína C reactiva esté arriba de los valores normales dado que la persona se encuentre en un área con emisiones de $PM_{10}$, $PM_{2.5}$ y $SO_2$ elevadas?
 ```{R}
